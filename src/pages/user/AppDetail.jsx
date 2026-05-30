@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ExternalLink, Timer, ImagePlus, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { ExternalLink, Timer, ImagePlus, ArrowLeft, CheckCircle2, Clock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
@@ -20,11 +20,18 @@ export default function AppDetail() {
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
   const [busy, setBusy] = useState(false)
+  // Two-step state
+  const [installation, setInstallation] = useState(null)
+  const [markingInstall, setMarkingInstall] = useState(false)
 
   useEffect(() => {
     supabase.from('apps').select('*').eq('id', id).single().then(({ data }) => {
       setApp(data)
       setText(data?.review_template || '')
+    })
+    // Check if user has already marked installation (for two-step)
+    supabase.from('app_installations').select('*').eq('app_id', id).maybeSingle().then(({ data }) => {
+      setInstallation(data)
     })
   }, [id])
 
@@ -39,10 +46,43 @@ export default function AppDetail() {
   const ready = opened && app && seconds >= app.wait_seconds
   const remaining = app ? Math.max(0, app.wait_seconds - seconds) : 0
 
+  // Two-step: check if 24h passed since installation
+  const twoStepReady = (() => {
+    if (!app?.two_step) return true // not two-step, always ready
+    if (!installation) return false // hasn't marked installation yet
+    const elapsed = Date.now() - new Date(installation.installed_at).getTime()
+    return elapsed >= 24 * 60 * 60 * 1000 // 24 hours
+  })()
+
+  const hoursLeft = (() => {
+    if (!app?.two_step || !installation) return 0
+    const elapsed = Date.now() - new Date(installation.installed_at).getTime()
+    const remaining = 24 * 60 * 60 * 1000 - elapsed
+    return Math.max(0, Math.ceil(remaining / (60 * 60 * 1000)))
+  })()
+
   const openStore = () => {
     setOpened(true)
     setSeconds(0)
     if (app?.play_store_url) window.open(app.play_store_url, '_blank', 'noopener')
+  }
+
+  const markInstalled = async () => {
+    setMarkingInstall(true)
+    try {
+      const { data, error } = await supabase.from('app_installations').upsert({
+        user_id: session.user.id,
+        app_id: id,
+        installed_at: new Date().toISOString(),
+      }, { onConflict: 'user_id,app_id' }).select().single()
+      if (error) throw error
+      setInstallation(data)
+      toast.success("Great! Come back after 24 hours to submit your review.")
+    } catch (err) {
+      toast.error(niceError(err))
+    } finally {
+      setMarkingInstall(false)
+    }
   }
 
   const pickFile = (e) => {
@@ -54,6 +94,7 @@ export default function AppDetail() {
 
   const submit = async () => {
     if (!file) return toast.error('Please upload your review screenshot.')
+    if (app?.two_step && !twoStepReady) return toast.error(`Please wait ${hoursLeft}h before submitting.`)
     setBusy(true)
     try {
       const ext = file.name.split('.').pop()
@@ -104,6 +145,36 @@ export default function AppDetail() {
         </button>
       </div>
 
+      {/* Two-Step Review section */}
+      {app.two_step && (
+        <div className="card border-2 border-amber-200 dark:border-amber-500/30">
+          <div className="flex items-start gap-3">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-amber-100 text-amber-600">
+              <Clock size={20} />
+            </div>
+            <div className="flex-1 text-center">
+              <p className="text-lg font-bold">Two-Step Review</p>
+              <p className="mt-1 text-sm text-slate-500">
+                This app requires you to <strong>install and use it first</strong>, then come back after <strong>24 hours</strong> to submit your review.
+              </p>
+              {!installation ? (
+                <button onClick={markInstalled} disabled={markingInstall} className="btn-primary mt-3">
+                  ✅ I've Installed the App
+                </button>
+              ) : !twoStepReady ? (
+                <div className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-600 dark:bg-amber-500/10">
+                  ⏳ Come back in ~{hoursLeft} hour{hoursLeft !== 1 ? 's' : ''} to submit your review
+                </div>
+              ) : (
+                <div className="mt-3 rounded-xl bg-emerald-50 p-3 text-sm font-semibold text-emerald-600 dark:bg-emerald-500/10">
+                  ✅ 24h passed! You can now submit your review below.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Timer / status */}
       <div className="card">
         <h3 className="mb-2 font-bold">Submit Proof</h3>
@@ -127,7 +198,7 @@ export default function AppDetail() {
         <ol className="mt-4 space-y-3 rounded-xl bg-slate-50 p-4 text-sm dark:bg-slate-800/50">
           <p className="text-center font-bold text-brand-600">STEPS TO SUBMIT REVIEW</p>
           {[
-            'Click "Open in Play Store" & download the app',
+            'Click "Open in Play Store" button above & download the app',
             `Open the app for ${app.wait_seconds} seconds after installation`,
             'Go back to Play Store and give 5 Star Rating with positive comment',
             'Take screenshot of your 5-star review and submit here',
@@ -163,7 +234,7 @@ export default function AppDetail() {
           )}
         </button>
 
-        <button onClick={submit} disabled={!ready || busy} className="btn-primary w-full">
+        <button onClick={submit} disabled={!ready || busy || (app.two_step && !twoStepReady)} className="btn-primary w-full">
           {busy ? 'Submitting…' : 'Submit Proof'}
         </button>
       </div>
