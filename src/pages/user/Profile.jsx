@@ -57,7 +57,7 @@ export default function Profile() {
       </div>
 
       {isAdmin && (
-        <a href="/admin" className="card flex w-full items-center justify-between text-left">
+        <a href={import.meta.env.VITE_ADMIN_URL || 'http://localhost:5173'} target="_blank" rel="noopener noreferrer" className="card flex w-full items-center justify-between text-left">
           <span className="flex items-center gap-2 font-bold text-brand-600"><Shield size={18} /> Open Admin Panel</span>
           <span className="text-slate-400">→</span>
         </a>

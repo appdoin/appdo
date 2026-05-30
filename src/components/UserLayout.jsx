@@ -63,7 +63,7 @@ export default function UserLayout() {
       </header>
 
       {/* Page content */}
-      <main className="flex-1 px-4 py-4 pb-24 animate-fade-in">
+      <main className="min-w-0 flex-1 px-4 py-4 pb-24 animate-fade-in">
         <Outlet />
       </main>
 

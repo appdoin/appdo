@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ChevronRight, Flame, Check, Clock } from 'lucide-react'
+import { Search, ChevronRight, Flame, Check, Clock, Grid3x3 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
 import { rupee, niceError } from '../../lib/format'
+
+// Fixed category list — mirrors the admin panel's category options.
+const ALL_CATEGORIES = ['Gaming', 'Productivity', 'Social', 'Entertainment', 'Education', 'Finance', 'Health', 'Shopping', 'Tools', 'Other']
 
 export default function Home() {
   const { profile, refreshProfile } = useAuth()
@@ -16,6 +19,34 @@ export default function Home() {
   const [q, setQ] = useState('')
   const [claim, setClaim] = useState({ claimedToday: false, day: 0 })
   const [claiming, setClaiming] = useState(false)
+
+  // Drag-to-scroll for the category strip (works with mouse on desktop + touch on mobile).
+  const catRef = useRef(null)
+  const drag = useRef({ down: false, startX: 0, startScroll: 0, moved: false })
+
+  const onPointerDown = (e) => {
+    const el = catRef.current
+    if (!el) return
+    drag.current = { down: true, startX: e.pageX, startScroll: el.scrollLeft, moved: false }
+  }
+  const onPointerMove = (e) => {
+    const el = catRef.current
+    if (!el || !drag.current.down) return
+    const dx = e.pageX - drag.current.startX
+    if (Math.abs(dx) > 3) drag.current.moved = true
+    el.scrollLeft = drag.current.startScroll - dx
+  }
+  const endDrag = () => {
+    drag.current.down = false
+  }
+  // Convert vertical wheel into horizontal scroll over the strip (desktop mouse).
+  const onWheel = (e) => {
+    const el = catRef.current
+    if (!el) return
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      el.scrollLeft += e.deltaY
+    }
+  }
 
   useEffect(() => {
     ;(async () => {
@@ -41,10 +72,12 @@ export default function Home() {
     })()
   }, [])
 
-  const categories = useMemo(
-    () => ['All', ...Array.from(new Set(apps.map((a) => a.category).filter(Boolean)))],
-    [apps],
-  )
+  const categories = useMemo(() => {
+    // Full fixed list always shown (like the design), plus any custom admin categories.
+    const present = new Set(apps.map((a) => a.category).filter(Boolean))
+    const extras = Array.from(present).filter((c) => !ALL_CATEGORIES.includes(c))
+    return ['All', ...ALL_CATEGORIES, ...extras]
+  }, [apps])
 
   const filtered = apps.filter(
     (a) =>
@@ -124,18 +157,31 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Categories */}
-      <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 py-0.5">
+      {/* Categories — horizontally scrollable strip (drag + wheel + touch) */}
+      <div
+        ref={catRef}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerLeave={endDrag}
+        onWheel={onWheel}
+        className="no-scrollbar flex w-full cursor-grab gap-2 overflow-x-scroll py-1 active:cursor-grabbing"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
         {categories.map((c) => (
           <button
             key={c}
-            onClick={() => setCat(c)}
-            className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition active:scale-95 ${
+            onClick={() => {
+              if (drag.current.moved) return
+              setCat(c)
+            }}
+            className={`flex shrink-0 select-none items-center gap-1 whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold transition active:scale-95 ${
               cat === c
                 ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/40'
                 : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
             }`}
           >
+            {c === 'All' && <Grid3x3 size={13} />}
             {c}
           </button>
         ))}

@@ -119,6 +119,66 @@ export default function Rewards() {
 
   return (
     <div className="space-y-4">
+      {/* Spin — shown first / at top */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-5 shadow-xl shadow-purple-500/30">
+        {/* decorative blobs */}
+        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+        <div className="absolute -bottom-8 left-4 h-20 w-20 rounded-full bg-white/5 blur-2xl" />
+        <p className="mb-1 text-center text-xl font-extrabold text-white">🎰 Daily Lucky Spin</p>
+        <p className="mb-3 text-center text-xs text-white/70">{spunToday ? 'Come back tomorrow!' : 'Spin once a day to win rewards'}</p>
+        {/* wheel + pointer */}
+        <div className="relative mx-auto h-56 w-56">
+          {/* pointer triangle */}
+          <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-0.5 drop-shadow-md">
+            <div className="h-0 w-0 border-x-[10px] border-t-[22px] border-x-transparent border-t-amber-400" />
+          </div>
+          <svg
+            viewBox="0 0 200 200"
+            className="h-full w-full drop-shadow-2xl transition-transform duration-[4000ms] ease-out"
+            style={{ transform: `rotate(${rotation}deg)` }}
+          >
+            {segments.map((amt, i) => {
+              const a0 = (i * seg - 90) * (Math.PI / 180)
+              const a1 = ((i + 1) * seg - 90) * (Math.PI / 180)
+              const x0 = 100 + 100 * Math.cos(a0)
+              const y0 = 100 + 100 * Math.sin(a0)
+              const x1 = 100 + 100 * Math.cos(a1)
+              const y1 = 100 + 100 * Math.sin(a1)
+              const mid = (i * seg + seg / 2 - 90) * (Math.PI / 180)
+              const tx = 100 + 62 * Math.cos(mid)
+              const ty = 100 + 62 * Math.sin(mid)
+              return (
+                <g key={i}>
+                  <path d={`M100,100 L${x0},${y0} A100,100 0 0,1 ${x1},${y1} Z`} fill={COLORS[i % COLORS.length]} stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
+                  <text x={tx} y={ty} fill="#fff" fontSize="13" fontWeight="700" textAnchor="middle" dominantBaseline="middle" transform={`rotate(${i * seg + seg / 2}, ${tx}, ${ty})`}>
+                    ₹{amt}
+                  </text>
+                </g>
+              )
+            })}
+            {/* center hub */}
+            <circle cx="100" cy="100" r="18" fill="white" />
+            <circle cx="100" cy="100" r="14" fill="#6366f1" />
+          </svg>
+          {/* center SPIN button */}
+          <button
+            onClick={spin}
+            disabled={spinning || spunToday}
+            className="absolute left-1/2 top-1/2 z-10 h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white text-[10px] font-extrabold text-brand-600 shadow-lg transition active:scale-95 disabled:opacity-60"
+          >
+            {spinning ? '…' : spunToday ? 'DONE' : 'SPIN'}
+          </button>
+        </div>
+        {/* result / status */}
+        {won != null ? (
+          <p className="mt-3 text-center text-xl font-extrabold text-yellow-300">🎉 You won {rupee(won)}!</p>
+        ) : spunToday ? (
+          <p className="mt-3 text-center text-sm text-white/60">Come back tomorrow for another spin!</p>
+        ) : (
+          <p className="mt-3 text-center text-sm font-semibold text-white/80">Tap SPIN to try your luck!</p>
+        )}
+      </div>
+
       {/* Earnings goal */}
       <div className="card">
         <div className="mb-2 flex items-center gap-2">
@@ -151,6 +211,20 @@ export default function Rewards() {
         </div>
       </div>
 
+      {/* Quick stats */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="card flex flex-col items-center gap-1 py-5">
+          <TrendingUp size={20} className="text-brand-500" />
+          <p className="text-2xl font-extrabold">{stats.approved}</p>
+          <p className="text-xs text-slate-400">Approved Reviews</p>
+        </div>
+        <div className="card flex flex-col items-center gap-1 py-5">
+          <Award size={20} className="text-amber-500" />
+          <p className="text-2xl font-extrabold">{earnedBadges.length}</p>
+          <p className="text-xs text-slate-400">Badges Earned</p>
+        </div>
+      </div>
+
       {/* Badges */}
       <div className="card">
         <div className="mb-3 flex items-center gap-2">
@@ -178,66 +252,6 @@ export default function Rewards() {
             </div>
           </>
         )}
-      </div>
-
-      {/* Quick stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="card flex flex-col items-center gap-1 py-5">
-          <TrendingUp size={20} className="text-brand-500" />
-          <p className="text-2xl font-extrabold">{stats.approved}</p>
-          <p className="text-xs text-slate-400">Approved Reviews</p>
-        </div>
-        <div className="card flex flex-col items-center gap-1 py-5">
-          <Award size={20} className="text-amber-500" />
-          <p className="text-2xl font-extrabold">{earnedBadges.length}</p>
-          <p className="text-xs text-slate-400">Badges Earned</p>
-        </div>
-      </div>
-
-      {/* Spin */}
-      <div className="card overflow-hidden bg-gradient-to-b from-violet-50 to-pink-50 dark:from-slate-900 dark:to-slate-900">
-        <p className="mb-3 text-center text-lg font-extrabold text-brand-600">🎰 Daily Lucky Spin ✨</p>
-        <div className="relative mx-auto h-64 w-64">
-          {/* pointer */}
-          <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1">
-            <div className="h-0 w-0 border-x-8 border-t-[18px] border-x-transparent border-t-amber-400" />
-          </div>
-          <svg
-            viewBox="0 0 200 200"
-            className="h-full w-full drop-shadow-lg transition-transform duration-[4000ms] ease-out"
-            style={{ transform: `rotate(${rotation}deg)` }}
-          >
-            {segments.map((amt, i) => {
-              const a0 = (i * seg - 90) * (Math.PI / 180)
-              const a1 = ((i + 1) * seg - 90) * (Math.PI / 180)
-              const x0 = 100 + 100 * Math.cos(a0)
-              const y0 = 100 + 100 * Math.sin(a0)
-              const x1 = 100 + 100 * Math.cos(a1)
-              const y1 = 100 + 100 * Math.sin(a1)
-              const mid = (i * seg + seg / 2 - 90) * (Math.PI / 180)
-              const tx = 100 + 62 * Math.cos(mid)
-              const ty = 100 + 62 * Math.sin(mid)
-              return (
-                <g key={i}>
-                  <path d={`M100,100 L${x0},${y0} A100,100 0 0,1 ${x1},${y1} Z`} fill={COLORS[i % COLORS.length]} />
-                  <text x={tx} y={ty} fill="#fff" fontSize="13" fontWeight="700" textAnchor="middle" dominantBaseline="middle" transform={`rotate(${i * seg + seg / 2}, ${tx}, ${ty})`}>
-                    ₹{amt}
-                  </text>
-                </g>
-              )
-            })}
-            <circle cx="100" cy="100" r="14" fill="#fff" />
-          </svg>
-          <button
-            onClick={spin}
-            disabled={spinning || spunToday}
-            className="absolute left-1/2 top-1/2 z-10 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white text-xs font-bold text-brand-600 shadow-md disabled:opacity-60"
-          >
-            {spunToday ? 'DONE' : 'SPIN'}
-          </button>
-        </div>
-        {won != null && <p className="mt-3 text-center text-lg font-extrabold text-emerald-500">🎉 You won {rupee(won)}!</p>}
-        {spunToday && won == null && <p className="mt-3 text-center text-sm text-slate-400">Come back tomorrow for another spin!</p>}
       </div>
 
       {/* Leaderboard */}
