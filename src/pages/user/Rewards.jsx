@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Target, Award, Trophy } from 'lucide-react'
+import { Target, Award, Trophy, TrendingUp } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
@@ -7,8 +7,11 @@ import { rupee, niceError } from '../../lib/format'
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6', '#f97316']
 
+const GOAL_OPTIONS = [100, 250, 500, 1000, 2500, 5000]
+const goalLabel = (g) => (g >= 1000 ? `₹${g / 1000}K` : `₹${g}`)
+
 const BADGES = [
-  { key: 'first', label: 'First Review', emoji: '⭐', need: (s) => s.approved >= 1 },
+  { key: 'first', label: '1 review', emoji: '⭐', need: (s) => s.approved >= 1 },
   { key: 'a5', label: '5 approved', emoji: '🌟', need: (s) => s.approved >= 5 },
   { key: 'a10', label: '10 approved', emoji: '🏅', need: (s) => s.approved >= 10 },
   { key: 'a25', label: '25 approved', emoji: '🥇', need: (s) => s.approved >= 25 },
@@ -16,6 +19,8 @@ const BADGES = [
   { key: 'e100', label: 'Earn ₹100', emoji: '💰', need: (s) => s.earned >= 100 },
   { key: 'e500', label: 'Earn ₹500', emoji: '💎', need: (s) => s.earned >= 500 },
   { key: 'e1000', label: 'Earn ₹1000', emoji: '🔥', need: (s) => s.earned >= 1000 },
+  { key: 'r1', label: '1 referral', emoji: '🎯', need: (s) => s.referrals >= 1 },
+  { key: 'r5', label: '5 referrals', emoji: '🤝', need: (s) => s.referrals >= 5 },
 ]
 
 export default function Rewards() {
@@ -27,7 +32,8 @@ export default function Rewards() {
   const [spinning, setSpinning] = useState(false)
   const [spunToday, setSpunToday] = useState(false)
   const [won, setWon] = useState(null)
-  const [stats, setStats] = useState({ approved: 0, earned: 0 })
+  const [stats, setStats] = useState({ approved: 0, earned: 0, referrals: 0 })
+  const [avgReward, setAvgReward] = useState(10)
   const [board, setBoard] = useState([])
   const [period, setPeriod] = useState('week')
 
@@ -36,7 +42,10 @@ export default function Rewards() {
       const { data: s } = await supabase.from('settings').select('key,value').in('key', ['spin_rewards', 'earning_goal'])
       s?.forEach((row) => {
         if (row.key === 'spin_rewards') setSegments(row.value)
-        if (row.key === 'earning_goal') setGoal(Number(row.value))
+        if (row.key === 'earning_goal') {
+          const saved = Number(localStorage.getItem('earning_goal_target'))
+          setGoal(saved && GOAL_OPTIONS.includes(saved) ? saved : Number(row.value))
+        }
       })
 
       const today = new Date().toISOString().slice(0, 10)
@@ -44,9 +53,26 @@ export default function Rewards() {
       setSpunToday(!!spin)
 
       const { count } = await supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('status', 'approved')
-      setStats({ approved: count ?? 0, earned: Number(profile?.total_earned ?? 0) })
+
+      const { count: refCount } = await supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('referred_by', profile?.id ?? '00000000-0000-0000-0000-000000000000')
+
+      const { data: appsData } = await supabase.from('apps').select('reward_amount').eq('active', true)
+      if (appsData?.length) {
+        const avg = appsData.reduce((sum, a) => sum + Number(a.reward_amount), 0) / appsData.length
+        setAvgReward(avg > 0 ? avg : 10)
+      }
+
+      setStats({ approved: count ?? 0, earned: Number(profile?.total_earned ?? 0), referrals: refCount ?? 0 })
     })()
-  }, [profile?.total_earned])
+  }, [profile?.total_earned, profile?.id])
+
+  const pickGoal = (g) => {
+    setGoal(g)
+    localStorage.setItem('earning_goal_target', String(g))
+  }
 
   useEffect(() => {
     ;(async () => {
@@ -85,6 +111,7 @@ export default function Rewards() {
 
   const earned = Number(profile?.total_earned ?? 0)
   const pct = Math.min(100, Math.round((earned / goal) * 100))
+  const reviewsToGo = Math.max(0, Math.ceil((goal - earned) / (avgReward || 10)))
   const earnedBadges = BADGES.filter((b) => b.need(stats))
   const lockedBadges = BADGES.filter((b) => !b.need(stats))
   const n = segments.length
@@ -105,7 +132,23 @@ export default function Rewards() {
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
           <div className="h-full rounded-full bg-brand-500 transition-all" style={{ width: pct + '%' }} />
         </div>
-        <p className="mt-1 text-xs text-slate-400">{pct}% complete</p>
+        <div className="mt-1 flex items-center justify-between text-xs">
+          <span className="text-slate-400">{pct}% complete</span>
+          {earned < goal && (
+            <span className="font-semibold text-brand-600">~{reviewsToGo} reviews to {rupee(goal)}</span>
+          )}
+        </div>
+        <div className="no-scrollbar mt-3 -mx-1 flex gap-2 overflow-x-auto px-1">
+          {GOAL_OPTIONS.map((g) => (
+            <button
+              key={g}
+              onClick={() => pickGoal(g)}
+              className={`chip shrink-0 ${goal === g ? 'border border-brand-500 bg-brand-50 text-brand-600 dark:bg-brand-500/10' : 'bg-slate-50 text-slate-500 dark:bg-slate-800 dark:text-slate-300'}`}
+            >
+              {goalLabel(g)}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Badges */}
@@ -135,6 +178,20 @@ export default function Rewards() {
             </div>
           </>
         )}
+      </div>
+
+      {/* Quick stats */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="card flex flex-col items-center gap-1 py-5">
+          <TrendingUp size={20} className="text-brand-500" />
+          <p className="text-2xl font-extrabold">{stats.approved}</p>
+          <p className="text-xs text-slate-400">Approved Reviews</p>
+        </div>
+        <div className="card flex flex-col items-center gap-1 py-5">
+          <Award size={20} className="text-amber-500" />
+          <p className="text-2xl font-extrabold">{earnedBadges.length}</p>
+          <p className="text-xs text-slate-400">Badges Earned</p>
+        </div>
       </div>
 
       {/* Spin */}
