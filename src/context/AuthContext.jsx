@@ -12,7 +12,22 @@ export function AuthProvider({ children }) {
 
   const loadProfile = useCallback(async (userId) => {
     if (!userId) return setProfile(null)
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
+    let { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
+    // Safety net: create profile if trigger missed it
+    if (!data) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || ''
+        await supabase.from('profiles').upsert({
+          id: user.id,
+          email: user.email,
+          full_name: name,
+          referral_code: user.id.replace(/-/g, '').substring(0, 8).toUpperCase(),
+        }, { onConflict: 'id' })
+        const res = await supabase.from('profiles').select('*').eq('id', userId).single()
+        data = res.data
+      }
+    }
     setProfile(data ?? null)
   }, [])
 

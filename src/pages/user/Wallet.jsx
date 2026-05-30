@@ -115,7 +115,7 @@ export default function Wallet() {
                   <p className="font-bold">{rupee(w.amount)}</p>
                   <p className="text-xs text-slate-400">{formatDate(w.created_at)} · {w.upi_id}</p>
                 </div>
-                <span className={`badge px-2.5 py-1 capitalize ${w.status === 'approved' ? 'bg-emerald-50 text-emerald-600' : w.status === 'rejected' ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'}`}>{w.status}</span>
+                <span className={`badge px-2.5 py-1 capitalize ${['approved', 'completed'].includes(w.status) ? 'bg-emerald-50 text-emerald-600' : ['rejected', 'failed'].includes(w.status) ? 'bg-rose-50 text-rose-600' : w.status === 'processing' ? 'bg-sky-50 text-sky-600' : 'bg-amber-50 text-amber-600'}`}>{w.status}</span>
               </div>
             ))}
           </div>
