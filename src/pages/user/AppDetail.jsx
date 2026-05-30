@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ExternalLink, Timer, ImagePlus, ArrowLeft, CheckCircle2, Clock } from 'lucide-react'
+import { ExternalLink, Timer, ImagePlus, ArrowLeft, CheckCircle2, Clock, ImageIcon, Camera } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
@@ -12,6 +12,7 @@ export default function AppDetail() {
   const { session } = useAuth()
   const toast = useToast()
   const fileRef = useRef(null)
+  const cameraRef = useRef(null)
 
   const [app, setApp] = useState(null)
   const [opened, setOpened] = useState(false)
@@ -88,6 +89,14 @@ export default function AppDetail() {
   const pickFile = (e) => {
     const f = e.target.files?.[0]
     if (!f) return
+    if (f.size > 5 * 1024 * 1024) {
+      toast.error('Image too large. Max 5MB allowed.')
+      return
+    }
+    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(f.type)) {
+      toast.error('Only JPG, PNG or WEBP images allowed.')
+      return
+    }
     setFile(f)
     setPreview(URL.createObjectURL(f))
   }
@@ -213,26 +222,47 @@ export default function AppDetail() {
       </div>
 
       {/* Review text + screenshot */}
-      <div className="card space-y-3">
+      <div className="card space-y-3 animate-slide-up">
         <div>
           <label className="text-sm font-semibold">Review Text (optional)</label>
+          {app.review_template && (
+            <button
+              type="button"
+              onClick={() => setText(app.review_template)}
+              className="mt-1.5 mb-1 block max-w-full truncate rounded-full bg-brand-50 px-3 py-1 text-left text-xs font-medium text-brand-600 transition hover:bg-brand-100 active:scale-95 dark:bg-brand-500/10 dark:text-brand-300"
+              title="Tap to use suggested review"
+            >
+              💡 {app.review_template.slice(0, 40)}{app.review_template.length > 40 ? '…' : ''}
+            </button>
+          )}
           <textarea className="input mt-1 min-h-[90px] resize-none" placeholder="Write or paste your review text here…" value={text} onChange={(e) => setText(e.target.value)} />
         </div>
 
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={pickFile} />
-        <button
-          onClick={() => fileRef.current?.click()}
-          className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-6 text-slate-400 dark:border-slate-700"
-        >
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={pickFile} />
+
+        <div className="rounded-xl border-2 border-dashed border-slate-300 p-5 text-center dark:border-slate-700">
           {preview ? (
-            <img src={preview} alt="preview" className="max-h-48 rounded-lg" />
+            <div className="space-y-3 animate-pop">
+              <img src={preview} alt="preview" className="mx-auto max-h-48 rounded-lg shadow-sm" />
+              <button onClick={() => { setFile(null); setPreview(null) }} className="text-xs font-semibold text-rose-500">Remove & re-upload</button>
+            </div>
           ) : (
             <>
-              <ImagePlus size={28} />
-              <span className="text-sm font-medium">Upload Review Screenshot</span>
+              <ImagePlus size={30} className="mx-auto text-slate-400" />
+              <p className="mt-2 text-sm font-semibold text-slate-500">Upload Review Screenshot</p>
+              <div className="mt-3 flex items-center justify-center gap-2">
+                <button type="button" onClick={() => fileRef.current?.click()} className="btn-soft px-4 py-2 text-sm">
+                  <ImageIcon size={16} /> Gallery
+                </button>
+                <button type="button" onClick={() => cameraRef.current?.click()} className="btn-soft px-4 py-2 text-sm">
+                  <Camera size={16} /> Camera
+                </button>
+              </div>
+              <p className="mt-2 text-[11px] text-slate-400">Max 5MB • JPG, PNG</p>
             </>
           )}
-        </button>
+        </div>
 
         <button onClick={submit} disabled={!ready || busy || (app.two_step && !twoStepReady)} className="btn-primary w-full">
           {busy ? 'Submitting…' : 'Submit Proof'}

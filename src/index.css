@@ -31,25 +31,36 @@ body {
   .card {
     @apply bg-white rounded-2xl shadow-card p-4 dark:bg-slate-900 dark:border dark:border-slate-800;
   }
+  .card-hover {
+    @apply card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99];
+  }
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
   }
   .btn-primary {
-    @apply btn bg-brand-500 text-white px-4 py-3 hover:bg-brand-600;
+    @apply btn bg-brand-500 text-white px-4 py-3 hover:bg-brand-600 shadow-sm shadow-brand-500/30 hover:shadow-md hover:shadow-brand-500/40;
   }
   .btn-soft {
     @apply btn bg-brand-50 text-brand-600 px-4 py-2.5 hover:bg-brand-100 dark:bg-slate-800 dark:text-brand-300;
   }
   .input {
-    @apply w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100;
+    @apply w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:focus:ring-brand-500/20;
   }
   .stat-card {
     @apply card flex flex-col items-center justify-center text-center py-3 px-2;
   }
   .chip {
-    @apply px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition;
+    @apply px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition active:scale-95;
   }
   .badge {
     @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold;
   }
+  .gradient-brand {
+    @apply bg-gradient-to-br from-brand-500 via-brand-600 to-brand-700;
+  }
+}
+
+/* Premium gradient header backgrounds in dark mode */
+.dark .gradient-brand {
+  @apply from-brand-600 via-brand-700 to-indigo-900;
 }

@@ -108,8 +108,10 @@ export default function Home() {
       </div>
 
       {/* Balance / potential */}
-      <div className="rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 p-5 text-white shadow-lg">
-        <div className="flex items-start justify-between">
+      <div className="gradient-brand relative overflow-hidden rounded-2xl p-5 text-white shadow-lg shadow-brand-500/30 animate-slide-up">
+        <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 blur-xl" />
+        <div className="absolute -bottom-10 left-10 h-24 w-24 rounded-full bg-white/5 blur-xl" />
+        <div className="relative flex items-start justify-between">
           <div>
             <p className="text-sm text-white/80">Your Balance</p>
             <p className="mt-1 text-3xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
@@ -123,12 +125,16 @@ export default function Home() {
       </div>
 
       {/* Categories */}
-      <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1">
+      <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 py-0.5">
         {categories.map((c) => (
           <button
             key={c}
             onClick={() => setCat(c)}
-            className={`chip ${cat === c ? 'bg-brand-500 text-white' : 'bg-white text-slate-600 dark:bg-slate-900 dark:text-slate-300'}`}
+            className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition active:scale-95 ${
+              cat === c
+                ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/40'
+                : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
+            }`}
           >
             {c}
           </button>
@@ -144,14 +150,15 @@ export default function Home() {
       {/* Apps */}
       <div className="space-y-3">
         {filtered.length === 0 && <p className="py-10 text-center text-slate-400">No apps found.</p>}
-        {filtered.map((a) => {
+        {filtered.map((a, idx) => {
           const status = reviewed[a.id]
           return (
             <button
               key={a.id}
               onClick={() => nav(`/app/${a.id}`)}
               disabled={!!status}
-              className="card flex w-full items-center gap-3 text-left disabled:opacity-60"
+              style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}
+              className="card-hover flex w-full animate-slide-up items-center gap-3 text-left disabled:opacity-60"
             >
               {a.icon_url ? (
                 <img src={a.icon_url} alt="" className="h-14 w-14 rounded-xl object-cover" />
@@ -167,12 +174,13 @@ export default function Home() {
                   <span>{a.slots_left} slots left</span>
                   <span className="rounded bg-slate-100 px-1.5 py-0.5 dark:bg-slate-800">{a.category}</span>
                   <span className="flex items-center gap-0.5"><Clock size={11} /> ~{a.est_time_min} min</span>
+                  {a.two_step && <span className="rounded bg-violet-100 px-1.5 py-0.5 font-semibold text-violet-600 dark:bg-violet-500/15">2-Step</span>}
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1">
-                <span className="badge bg-emerald-50 text-emerald-600 px-2.5 py-1 dark:bg-emerald-500/10">{rupee(a.reward_amount)}</span>
+                <span className="badge bg-emerald-50 px-2.5 py-1 font-bold text-emerald-600 dark:bg-emerald-500/10">{rupee(a.reward_amount)}</span>
                 {status ? (
-                  <span className={`text-xs font-semibold ${status === 'approved' ? 'text-emerald-500' : status === 'rejected' ? 'text-rose-500' : 'text-amber-500'}`}>
+                  <span className={`text-xs font-semibold capitalize ${status === 'approved' ? 'text-emerald-500' : status === 'rejected' ? 'text-rose-500' : 'text-amber-500'}`}>
                     {status}
                   </span>
                 ) : (
