@@ -52,9 +52,9 @@ export default function Wallet() {
   return (
     <div className="space-y-4">
       {/* Balance */}
-      <div className="rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 p-6 text-white shadow-lg">
-        <p className="flex items-center gap-2 text-sm text-white/80"><CreditCard size={16} /> Available Balance</p>
-        <p className="mt-2 text-4xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
+      <div className="rounded-xl bg-gradient-to-r from-brand-500 to-brand-700 p-4 text-white shadow-md">
+        <p className="flex items-center gap-1.5 text-xs text-white/80"><CreditCard size={13} /> Available Balance</p>
+        <p className="mt-1 text-2xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
       </div>
 
       {/* WhatsApp verification */}

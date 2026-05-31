@@ -120,21 +120,21 @@ export default function Rewards() {
   return (
     <div className="space-y-4">
       {/* Spin — shown first / at top */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-5 shadow-xl shadow-purple-500/30">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-3 shadow-lg shadow-purple-500/30">
         {/* decorative blobs */}
-        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-        <div className="absolute -bottom-8 left-4 h-20 w-20 rounded-full bg-white/5 blur-2xl" />
-        <p className="mb-1 text-center text-xl font-extrabold text-white">🎰 Daily Lucky Spin</p>
-        <p className="mb-3 text-center text-xs text-white/70">{spunToday ? 'Come back tomorrow!' : 'Spin once a day to win rewards'}</p>
+        <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-white/10 blur-2xl" />
+        <div className="absolute -bottom-8 left-4 h-14 w-14 rounded-full bg-white/5 blur-2xl" />
+        <p className="mb-0.5 text-center text-sm font-extrabold text-white">🎰 Daily Lucky Spin</p>
+        <p className="mb-2 text-center text-[10px] text-white/70">{spunToday ? 'Come back tomorrow!' : 'Spin once a day to win rewards'}</p>
         {/* wheel + pointer */}
-        <div className="relative mx-auto h-56 w-56">
+        <div className="relative mx-auto h-40 w-40">
           {/* pointer triangle */}
           <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-0.5 drop-shadow-md">
-            <div className="h-0 w-0 border-x-[10px] border-t-[22px] border-x-transparent border-t-amber-400" />
+            <div className="h-0 w-0 border-x-[7px] border-t-[16px] border-x-transparent border-t-amber-400" />
           </div>
           <svg
             viewBox="0 0 200 200"
-            className="h-full w-full drop-shadow-2xl transition-transform duration-[4000ms] ease-out"
+            className="h-full w-full drop-shadow-xl transition-transform duration-[4000ms] ease-out"
             style={{ transform: `rotate(${rotation}deg)` }}
           >
             {segments.map((amt, i) => {
@@ -150,49 +150,49 @@ export default function Rewards() {
               return (
                 <g key={i}>
                   <path d={`M100,100 L${x0},${y0} A100,100 0 0,1 ${x1},${y1} Z`} fill={COLORS[i % COLORS.length]} stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-                  <text x={tx} y={ty} fill="#fff" fontSize="13" fontWeight="700" textAnchor="middle" dominantBaseline="middle" transform={`rotate(${i * seg + seg / 2}, ${tx}, ${ty})`}>
+                  <text x={tx} y={ty} fill="#fff" fontSize="12" fontWeight="700" textAnchor="middle" dominantBaseline="middle" transform={`rotate(${i * seg + seg / 2}, ${tx}, ${ty})`}>
                     ₹{amt}
                   </text>
                 </g>
               )
             })}
             {/* center hub */}
-            <circle cx="100" cy="100" r="18" fill="white" />
-            <circle cx="100" cy="100" r="14" fill="#6366f1" />
+            <circle cx="100" cy="100" r="16" fill="white" />
+            <circle cx="100" cy="100" r="12" fill="#6366f1" />
           </svg>
           {/* center SPIN button */}
           <button
             onClick={spin}
             disabled={spinning || spunToday}
-            className="absolute left-1/2 top-1/2 z-10 h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white text-[10px] font-extrabold text-brand-600 shadow-lg transition active:scale-95 disabled:opacity-60"
+            className="absolute left-1/2 top-1/2 z-10 h-9 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white text-[9px] font-extrabold text-brand-600 shadow-md transition active:scale-95 disabled:opacity-60"
           >
             {spinning ? '…' : spunToday ? 'DONE' : 'SPIN'}
           </button>
         </div>
         {/* result / status */}
         {won != null ? (
-          <p className="mt-3 text-center text-xl font-extrabold text-yellow-300">🎉 You won {rupee(won)}!</p>
+          <p className="mt-2 text-center text-sm font-extrabold text-yellow-300">🎉 You won {rupee(won)}!</p>
         ) : spunToday ? (
-          <p className="mt-3 text-center text-sm text-white/60">Come back tomorrow for another spin!</p>
+          <p className="mt-2 text-center text-[10px] text-white/60">Come back tomorrow for another spin!</p>
         ) : (
-          <p className="mt-3 text-center text-sm font-semibold text-white/80">Tap SPIN to try your luck!</p>
+          <p className="mt-2 text-center text-xs font-semibold text-white/80">Tap SPIN to try your luck!</p>
         )}
       </div>
 
       {/* Earnings goal */}
-      <div className="card">
-        <div className="mb-2 flex items-center gap-2">
-          <Target size={18} className="text-brand-500" />
-          <h3 className="font-bold">Earnings Goal</h3>
+      <div className="card py-3">
+        <div className="mb-1 flex items-center gap-1.5">
+          <Target size={14} className="text-brand-500" />
+          <h3 className="text-sm font-bold">Earnings Goal</h3>
         </div>
         <div className="flex items-end justify-between">
-          <p className="text-3xl font-extrabold text-emerald-500">{rupee(earned)}</p>
-          <p className="text-sm text-slate-400">Goal: {rupee(goal)}</p>
+          <p className="text-xl font-extrabold text-emerald-500">{rupee(earned)}</p>
+          <p className="text-xs text-slate-400">Goal: {rupee(goal)}</p>
         </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
           <div className="h-full rounded-full bg-brand-500 transition-all" style={{ width: pct + '%' }} />
         </div>
-        <div className="mt-1 flex items-center justify-between text-xs">
+        <div className="mt-1 flex items-center justify-between text-[10px]">
           <span className="text-slate-400">{pct}% complete</span>
           {earned < goal && (
             <span className="font-semibold text-brand-600">~{reviewsToGo} reviews to {rupee(goal)}</span>
@@ -212,40 +212,40 @@ export default function Rewards() {
       </div>
 
       {/* Quick stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="card flex flex-col items-center gap-1 py-5">
-          <TrendingUp size={20} className="text-brand-500" />
-          <p className="text-2xl font-extrabold">{stats.approved}</p>
-          <p className="text-xs text-slate-400">Approved Reviews</p>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="card flex flex-col items-center gap-0.5 py-3">
+          <TrendingUp size={15} className="text-brand-500" />
+          <p className="text-lg font-extrabold">{stats.approved}</p>
+          <p className="text-[10px] text-slate-400">Approved Reviews</p>
         </div>
-        <div className="card flex flex-col items-center gap-1 py-5">
-          <Award size={20} className="text-amber-500" />
-          <p className="text-2xl font-extrabold">{earnedBadges.length}</p>
-          <p className="text-xs text-slate-400">Badges Earned</p>
+        <div className="card flex flex-col items-center gap-0.5 py-3">
+          <Award size={15} className="text-amber-500" />
+          <p className="text-lg font-extrabold">{earnedBadges.length}</p>
+          <p className="text-[10px] text-slate-400">Badges Earned</p>
         </div>
       </div>
 
       {/* Badges */}
-      <div className="card">
-        <div className="mb-3 flex items-center gap-2">
-          <Award size={18} className="text-amber-500" />
-          <h3 className="font-bold">Achievement Badges</h3>
-          <span className="text-xs text-slate-400">({earnedBadges.length} earned)</span>
+      <div className="card py-3">
+        <div className="mb-2 flex items-center gap-1.5">
+          <Award size={14} className="text-amber-500" />
+          <h3 className="text-sm font-bold">Badges</h3>
+          <span className="text-[10px] text-slate-400">({earnedBadges.length} earned)</span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {earnedBadges.map((b) => (
-            <div key={b.key} className="flex flex-col items-center gap-1 rounded-xl bg-brand-50 px-4 py-2 dark:bg-brand-500/10">
-              <span className="text-2xl">{b.emoji}</span>
-              <span className="text-xs font-semibold">{b.label}</span>
+            <div key={b.key} className="flex items-center gap-1 rounded-lg bg-brand-50 px-2 py-1 dark:bg-brand-500/10">
+              <span className="text-sm">{b.emoji}</span>
+              <span className="text-[10px] font-semibold">{b.label}</span>
             </div>
           ))}
         </div>
         {lockedBadges.length > 0 && (
           <>
-            <p className="mb-2 mt-3 text-xs font-medium text-slate-400">Locked Badges</p>
-            <div className="grid grid-cols-3 gap-2">
+            <p className="mb-1.5 mt-2 text-[10px] font-medium text-slate-400">Locked</p>
+            <div className="grid grid-cols-3 gap-1.5">
               {lockedBadges.map((b) => (
-                <div key={b.key} className="flex items-center gap-1 rounded-lg bg-slate-50 px-2 py-2 text-xs text-slate-400 opacity-60 dark:bg-slate-800">
+                <div key={b.key} className="flex items-center gap-1 rounded-lg bg-slate-50 px-1.5 py-1 text-[10px] text-slate-400 opacity-60 dark:bg-slate-800">
                   <span className="grayscale">{b.emoji}</span> {b.label}
                 </div>
               ))}
@@ -255,28 +255,28 @@ export default function Rewards() {
       </div>
 
       {/* Leaderboard */}
-      <div className="card">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Trophy size={18} className="text-amber-500" />
-            <h3 className="font-bold">Leaderboard</h3>
+      <div className="card py-3">
+        <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Trophy size={14} className="text-amber-500" />
+            <h3 className="text-sm font-bold">Leaderboard</h3>
           </div>
-          <div className="flex rounded-lg bg-slate-100 p-0.5 text-xs dark:bg-slate-800">
+          <div className="flex rounded-md bg-slate-100 p-0.5 text-[10px] dark:bg-slate-800">
             {['week', 'month'].map((p) => (
-              <button key={p} onClick={() => setPeriod(p)} className={`rounded-md px-3 py-1 font-semibold capitalize ${period === p ? 'bg-brand-500 text-white' : 'text-slate-500'}`}>
+              <button key={p} onClick={() => setPeriod(p)} className={`rounded px-2 py-0.5 font-semibold capitalize ${period === p ? 'bg-brand-500 text-white' : 'text-slate-500'}`}>
                 {p}
               </button>
             ))}
           </div>
         </div>
         {board.length === 0 ? (
-          <p className="py-6 text-center text-sm text-slate-400">No data yet</p>
+          <p className="py-4 text-center text-xs text-slate-400">No data yet</p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1">
             {board.map((u, i) => (
-              <div key={i} className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm">
-                <span className="flex items-center gap-2">
-                  <span className="grid h-6 w-6 place-items-center rounded-full bg-slate-100 text-xs font-bold dark:bg-slate-800">{i + 1}</span>
+              <div key={i} className="flex items-center justify-between rounded-md px-1.5 py-1 text-xs">
+                <span className="flex items-center gap-1.5">
+                  <span className="grid h-5 w-5 place-items-center rounded-full bg-slate-100 text-[10px] font-bold dark:bg-slate-800">{i + 1}</span>
                   {u.full_name || 'User'}
                 </span>
                 <span className="font-semibold text-emerald-500">{rupee(u.total_earned)}</span>
