@@ -111,10 +111,11 @@ export default function Home() {
       <AnnouncementBanner />
 
       {/* Daily claim */}
-      <div className="card py-3">
+      <div className="card relative overflow-hidden py-3 animate-fade-in">
+        <div className="decor-leaf leaf-3" style={{ opacity: 0.08 }} />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className={`grid h-8 w-8 place-items-center rounded-full ${claim.claimedToday ? 'bg-emerald-100 text-emerald-600' : 'bg-brand-100 text-brand-600'}`}>
+            <div className={`grid h-8 w-8 place-items-center rounded-full transition-all duration-300 ${claim.claimedToday ? 'bg-emerald-100 text-emerald-600 animate-pop' : 'bg-brand-100 text-brand-600 animate-pulse-soft'}`}>
               {claim.claimedToday ? <Check size={16} /> : <Flame size={16} />}
             </div>
             <div>
@@ -146,8 +147,10 @@ export default function Home() {
 
       {/* Balance / potential */}
       <div className="gradient-brand relative overflow-hidden rounded-2xl p-4 text-white shadow-md shadow-brand-500/30 animate-slide-up">
-        <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-white/10 blur-xl" />
+        <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-white/10 blur-xl animate-pulse-soft" />
         <div className="absolute -bottom-10 left-10 h-16 w-16 rounded-full bg-white/5 blur-xl" />
+        <div className="decor-leaf leaf-1" />
+        <div className="decor-leaf leaf-2" />
         <div className="relative flex items-start justify-between">
           <div>
             <p className="text-xs text-white/80">Your Balance</p>

@@ -274,6 +274,11 @@ export default function AppDetail() {
           {busy ? 'Submitting…' : 'Submit Proof'}
         </button>
       </div>
+
+      {/* Bottom back button */}
+      <button onClick={() => nav(-1)} className="btn-soft w-full py-2.5 text-sm">
+        <ArrowLeft size={15} /> Go Back
+      </button>
     </div>
   )
 }

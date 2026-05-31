@@ -52,9 +52,12 @@ export default function Wallet() {
   return (
     <div className="space-y-4">
       {/* Balance */}
-      <div className="rounded-xl bg-gradient-to-r from-brand-500 to-brand-700 p-4 text-white shadow-md">
-        <p className="flex items-center gap-1.5 text-xs text-white/80"><CreditCard size={13} /> Available Balance</p>
-        <p className="mt-1 text-2xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-brand-500 to-brand-700 p-4 text-white shadow-md animate-slide-up">
+        <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-white/10 blur-xl animate-pulse-soft" />
+        <div className="absolute -bottom-6 left-8 h-12 w-12 rounded-full bg-white/5 blur-xl" />
+        <div className="decor-leaf leaf-1" style={{ opacity: 0.2 }} />
+        <p className="relative flex items-center gap-1.5 text-xs text-white/80"><CreditCard size={13} /> Available Balance</p>
+        <p className="relative mt-1 text-2xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
       </div>
 
       {/* WhatsApp verification */}

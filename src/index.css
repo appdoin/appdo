@@ -20,7 +20,78 @@ body {
 }
 
 .dark body {
-  @apply bg-slate-950 text-slate-100;
+  @apply bg-[#0a0e1a] text-slate-100;
+}
+
+/* ===== STARRY DARK MODE BACKGROUND ===== */
+.dark .stars-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 20% 50%, #0f1629 0%, #0a0e1a 50%, #050711 100%);
+}
+.dark .stars-bg::before,
+.dark .stars-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+.dark .stars-bg::before {
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 80%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 50% 10%, rgba(199,204,255,0.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 30%, rgba(163,168,255,0.7) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 15% 55%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 45% 45%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 65% 85%, rgba(199,204,255,0.6) 0%, transparent 100%),
+    radial-gradient(2px 2px at 80% 15%, rgba(128,132,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 25% 35%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 85% 50%, rgba(163,168,255,0.6) 0%, transparent 100%);
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+.dark .stars-bg::after {
+  background-image:
+    radial-gradient(1px 1px at 5% 90%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 20% 10%, rgba(128,132,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 30%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 50%, rgba(199,204,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 75% 75%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(2px 2px at 35% 65%, rgba(99,102,241,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 95% 85%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 95%, rgba(163,168,255,0.5) 0%, transparent 100%);
+  animation: twinkle 5s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* Subtle shooting star */
+.dark .shooting-star {
+  position: fixed;
+  top: 10%;
+  left: -10%;
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(99,102,241,0.8), transparent);
+  border-radius: 50%;
+  animation: shoot 8s linear infinite;
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+@keyframes shoot {
+  0% { transform: translateX(0) translateY(0) rotate(-25deg); opacity: 0; }
+  5% { opacity: 1; }
+  15% { transform: translateX(calc(100vw + 100px)) translateY(30vh) rotate(-25deg); opacity: 0; }
+  100% { opacity: 0; }
 }
 
 /* hide scrollbar for category chips */
@@ -29,7 +100,7 @@ body {
 
 @layer components {
   .card {
-    @apply bg-white rounded-2xl shadow-card p-3 dark:bg-slate-900 dark:border dark:border-slate-800;
+    @apply bg-white rounded-2xl shadow-card p-3 dark:bg-slate-900/80 dark:border dark:border-slate-800/60 dark:backdrop-blur-sm;
   }
   .card-hover {
     @apply card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.99];
@@ -63,4 +134,48 @@ body {
 /* Premium gradient header backgrounds in dark mode */
 .dark .gradient-brand {
   @apply from-brand-600 via-brand-700 to-indigo-900;
+}
+
+/* ===== ANIMATIONS ===== */
+.animate-stagger > * {
+  animation: fade-in 0.35s ease-out both;
+}
+.animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.animate-stagger > *:nth-child(2) { animation-delay: 50ms; }
+.animate-stagger > *:nth-child(3) { animation-delay: 100ms; }
+.animate-stagger > *:nth-child(4) { animation-delay: 150ms; }
+.animate-stagger > *:nth-child(5) { animation-delay: 200ms; }
+.animate-stagger > *:nth-child(6) { animation-delay: 250ms; }
+.animate-stagger > *:nth-child(7) { animation-delay: 300ms; }
+.animate-stagger > *:nth-child(8) { animation-delay: 350ms; }
+.animate-stagger > *:nth-child(9) { animation-delay: 400ms; }
+.animate-stagger > *:nth-child(10) { animation-delay: 450ms; }
+
+/* Decorative leaf / petal shapes */
+.decor-leaf {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 0 50% 50% 50%;
+  opacity: 0.12;
+  animation: float 4s ease-in-out infinite;
+}
+.decor-leaf.leaf-1 { top: 8px; right: 12px; background: #6366f1; animation-delay: 0s; }
+.decor-leaf.leaf-2 { bottom: 8px; left: 12px; background: #10b981; animation-delay: 1s; transform: rotate(90deg); }
+.decor-leaf.leaf-3 { top: 50%; right: 8px; background: #f59e0b; animation-delay: 2s; transform: rotate(180deg); width: 12px; height: 12px; }
+
+/* Sparkle dots for premium sections */
+.decor-sparkle::before {
+  content: '✦';
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 10px;
+  color: rgba(99,102,241,0.3);
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+  50% { transform: translateY(-4px) rotate(var(--rot, 0deg)); }
 }

@@ -4,7 +4,6 @@ import { User as UserIcon, Save, LogOut, Award, Shield, Gift } from 'lucide-reac
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
-import PhoneVerify from '../../components/PhoneVerify'
 import { rupee } from '../../lib/format'
 
 export default function Profile() {
@@ -67,8 +66,6 @@ export default function Profile() {
         <span className="flex items-center gap-2 font-bold text-violet-600"><Gift size={18} /> Refer &amp; Earn</span>
         <span className="text-slate-400">→</span>
       </NavLink>
-
-      <PhoneVerify />
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-2">

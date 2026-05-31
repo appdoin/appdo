@@ -120,14 +120,18 @@ export default function Rewards() {
   return (
     <div className="space-y-4">
       {/* Spin — shown first / at top */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-3 shadow-lg shadow-purple-500/30">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-3 shadow-lg shadow-purple-500/30 animate-fade-in">
         {/* decorative blobs */}
-        <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-white/10 blur-2xl" />
-        <div className="absolute -bottom-8 left-4 h-14 w-14 rounded-full bg-white/5 blur-2xl" />
+        <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-white/10 blur-2xl animate-pulse-soft" />
+        <div className="absolute -bottom-8 left-4 h-14 w-14 rounded-full bg-white/5 blur-2xl animate-float" />
+        <div className="decor-leaf leaf-1" style={{ opacity: 0.2 }} />
+        <div className="decor-leaf leaf-3" style={{ opacity: 0.15 }} />
         <p className="mb-0.5 text-center text-sm font-extrabold text-white">🎰 Daily Lucky Spin</p>
         <p className="mb-2 text-center text-[10px] text-white/70">{spunToday ? 'Come back tomorrow!' : 'Spin once a day to win rewards'}</p>
         {/* wheel + pointer */}
         <div className="relative mx-auto h-40 w-40">
+          {/* outer glow ring */}
+          <div className="absolute inset-0 rounded-full animate-glow" />
           {/* pointer triangle */}
           <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-0.5 drop-shadow-md">
             <div className="h-0 w-0 border-x-[7px] border-t-[16px] border-x-transparent border-t-amber-400" />
@@ -171,11 +175,11 @@ export default function Rewards() {
         </div>
         {/* result / status */}
         {won != null ? (
-          <p className="mt-2 text-center text-sm font-extrabold text-yellow-300">🎉 You won {rupee(won)}!</p>
+          <p className="mt-2 animate-bounce-in text-center text-sm font-extrabold text-yellow-300">🎉 You won {rupee(won)}!</p>
         ) : spunToday ? (
           <p className="mt-2 text-center text-[10px] text-white/60">Come back tomorrow for another spin!</p>
         ) : (
-          <p className="mt-2 text-center text-xs font-semibold text-white/80">Tap SPIN to try your luck!</p>
+          <p className="mt-2 text-center text-xs font-semibold text-white/80 animate-pulse-soft">Tap SPIN to try your luck!</p>
         )}
       </div>
 

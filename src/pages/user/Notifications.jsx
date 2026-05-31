@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, CheckCheck, IndianRupee, Star, AlertCircle, Gift, Trash2 } from 'lucide-react'
+import { CheckCircle2, CheckCheck, IndianRupee, Star, AlertCircle, Gift, Trash2, ArrowLeft } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useNotifications } from '../../context/NotificationsContext'
@@ -118,6 +118,11 @@ export default function Notifications() {
           })}
         </div>
       )}
+
+      {/* Bottom back */}
+      <button onClick={() => window.history.back()} className="btn-soft w-full py-2.5 text-sm">
+        <ArrowLeft size={15} /> Go Back
+      </button>
     </div>
   )
 }

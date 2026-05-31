@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Copy, CheckCircle2, Users, IndianRupee, Gift, Share2 } from 'lucide-react'
+import { Copy, CheckCircle2, Users, IndianRupee, Gift, Share2, ArrowLeft } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useDataCache } from '../../context/DataCacheContext'
@@ -214,6 +214,11 @@ export default function Referral() {
           </div>
         )}
       </div>
+
+      {/* Bottom back */}
+      <button onClick={() => window.history.back()} className="btn-soft w-full py-2.5 text-sm">
+        <ArrowLeft size={15} /> Go Back
+      </button>
     </div>
   )
 }

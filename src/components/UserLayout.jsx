@@ -38,9 +38,13 @@ export default function UserLayout() {
     .toUpperCase()
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col bg-slate-100 dark:bg-slate-950">
+    <div className="mx-auto flex min-h-screen max-w-md flex-col bg-slate-100 dark:bg-[#0a0e1a]">
+      {/* Starry dark mode background */}
+      <div className="stars-bg" />
+      <div className="shooting-star" />
+      
       {/* Header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-slate-200/70 bg-white/90 px-3 py-2 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
+      <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-slate-200/70 bg-white/90 px-3 py-2 backdrop-blur dark:border-slate-800/50 dark:bg-[#0d1225]/90">
         <div className="flex items-center gap-2">
           <div className="grid h-8 w-8 place-items-center rounded-lg bg-brand-500 text-sm font-bold text-white">
             {initials}
@@ -72,12 +76,14 @@ export default function UserLayout() {
       </header>
 
       {/* Page content */}
-      <main className="min-w-0 flex-1 px-4 py-4 pb-24 animate-fade-in">
-        <Outlet />
+      <main className="relative z-10 min-w-0 flex-1 px-4 py-4 pb-24">
+        <div className="animate-stagger">
+          <Outlet />
+        </div>
       </main>
 
       {/* Bottom navigation */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md border-t border-slate-200 bg-white/95 px-2 py-2 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+      <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md border-t border-slate-200 bg-white/95 px-2 py-2 backdrop-blur dark:border-slate-800/50 dark:bg-[#0d1225]/95">
         <div className="flex items-center justify-around">
           {NAV.map(({ to, icon: Icon, label }) => (
             <NavLink
