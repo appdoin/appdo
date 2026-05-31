@@ -32,21 +32,19 @@ export function AuthProvider({ children }) {
   }, [])
 
   useEffect(() => {
-    const timeout = setTimeout(() => setLoading(false), 6000)
-
     supabase.auth.getSession().then(({ data }) => {
-      clearTimeout(timeout)
-      setSession(data.session)
-      loadProfile(data.session?.user?.id).finally(() => setLoading(false))
-    }).catch(() => {
-      clearTimeout(timeout)
+      const s = data.session
+      setSession(s)
       setLoading(false)
-    })
+      if (s?.user?.id) loadProfile(s.user.id)
+    }).catch(() => setLoading(false))
+
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s)
-      loadProfile(s?.user?.id)
+      if (s?.user?.id) loadProfile(s.user.id)
+      else setProfile(null)
     })
-    return () => { sub.subscription.unsubscribe(); clearTimeout(timeout) }
+    return () => sub.subscription.unsubscribe()
   }, [loadProfile])
 
   const refreshProfile = useCallback(
