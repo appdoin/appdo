@@ -208,33 +208,33 @@ export default function Home() {
               onClick={() => nav(`/app/${a.id}`)}
               disabled={!!status}
               style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}
-              className="card-hover flex w-full animate-slide-up items-center gap-3 text-left disabled:opacity-60"
+              className="card-hover flex w-full animate-slide-up items-center gap-2.5 text-left disabled:opacity-60"
             >
               {a.icon_url ? (
-                <img src={a.icon_url} alt="" className="h-14 w-14 rounded-xl object-cover" />
+                <img src={a.icon_url} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
               ) : (
-                <div className="grid h-14 w-14 place-items-center rounded-xl bg-brand-100 text-xl font-bold text-brand-600">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-100 text-lg font-bold text-brand-600">
                   {a.name[0]}
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate font-bold">{a.name}</p>
-                <p className="truncate text-sm text-slate-400">{a.description}</p>
-                <div className="mt-1 flex items-center gap-2 text-xs text-slate-400">
-                  <span>{a.slots_left} slots left</span>
-                  <span className="rounded bg-slate-100 px-1.5 py-0.5 dark:bg-slate-800">{a.category}</span>
-                  <span className="flex items-center gap-0.5"><Clock size={11} /> ~{a.est_time_min} min</span>
-                  {a.two_step && <span className="rounded bg-violet-100 px-1.5 py-0.5 font-semibold text-violet-600 dark:bg-violet-500/15">2-Step</span>}
+                <p className="truncate text-sm font-bold">{a.name}</p>
+                <p className="truncate text-xs text-slate-400">{a.description}</p>
+                <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400">
+                  <span>{a.slots_left} slots</span>
+                  <span className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-800">{a.category}</span>
+                  <span className="flex items-center gap-0.5"><Clock size={10} /> ~{a.est_time_min}m</span>
+                  {a.two_step && <span className="rounded bg-violet-100 px-1 py-0.5 font-semibold text-violet-600 dark:bg-violet-500/15">2-Step</span>}
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <span className="badge bg-emerald-50 px-2.5 py-1 font-bold text-emerald-600 dark:bg-emerald-500/10">{rupee(a.reward_amount)}</span>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <span className="badge bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-600 dark:bg-emerald-500/10">{rupee(a.reward_amount)}</span>
                 {status ? (
                   <span className={`text-xs font-semibold capitalize ${status === 'approved' ? 'text-emerald-500' : status === 'rejected' ? 'text-rose-500' : 'text-amber-500'}`}>
                     {status}
                   </span>
                 ) : (
-                  <ChevronRight size={18} className="text-brand-500" />
+                  <ChevronRight size={15} className="text-brand-500" />
                 )}
               </div>
             </button>
