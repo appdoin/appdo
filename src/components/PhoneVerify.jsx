@@ -1,29 +1,23 @@
 import { useState } from 'react'
-import { ShieldCheck, MessageCircle, Send, AlertTriangle } from 'lucide-react'
+import { ShieldCheck, MessageCircle, Send, AlertTriangle, Clock } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from './Toast'
 import { niceError } from '../lib/format'
 
-// SECURE WhatsApp OTP flow:
-// 1. Frontend sends phone to Edge Function (send-whatsapp-otp)
-// 2. Edge Function generates OTP server-side, stores in DB
-// 3. Edge Function delivers code via CallMeBot to the target number
-// 4. Code is NEVER returned to the browser
-// 5. User receives code on their WhatsApp and enters it
-// 6. Frontend verifies via RPC (verify_phone_otp)
-//
-// Security:
-// - Code never exposed to frontend
-// - Phone checked for duplicates server-side before sending
-// - Rate limited by DB (max 5 attempts)
+// Admin-based WhatsApp OTP flow:
+// 1. User enters phone number → Edge Function stores OTP in DB
+// 2. Admin sees request in admin panel with OTP code
+// 3. Admin clicks "Send OTP" → opens wa.me link, sends manually
+// 4. User receives code on WhatsApp, enters it here
+// 5. Code verified via RPC → phone linked to account
 
 export default function PhoneVerify() {
   const { profile, refreshProfile } = useAuth()
   const toast = useToast()
   const [phone, setPhone] = useState(profile?.phone || '')
   const [code, setCode] = useState('')
-  const [step, setStep] = useState('input') // input | sending | verify
+  const [step, setStep] = useState('input') // input | sending | waiting | verify
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -48,16 +42,20 @@ export default function PhoneVerify() {
     setBusy(true)
     setStep('sending')
     try {
-      // Call Edge Function — code is sent server-side, NEVER returned to browser
       const { data, error: fnErr } = await supabase.functions.invoke('send-whatsapp-otp', {
         body: { phone: cleanPhone },
       })
 
       if (fnErr) throw fnErr
       if (data?.error) {
-        // Handle specific errors
         if (data.error.includes('PHONE_ALREADY_USED')) {
           setError('This number is already verified on another account.')
+          setStep('input')
+          setBusy(false)
+          return
+        }
+        if (data.error.includes('TOO_MANY_OTP_REQUESTS')) {
+          setError('Too many requests. Please wait 1 hour before trying again.')
           setStep('input')
           setBusy(false)
           return
@@ -66,7 +64,7 @@ export default function PhoneVerify() {
       }
 
       setStep('verify')
-      toast.success('Code sent to your WhatsApp! Check your messages.')
+      toast.success('Request submitted! Admin will send code to your WhatsApp shortly.')
     } catch (err) {
       setError(niceError(err))
       setStep('input')
@@ -96,7 +94,7 @@ export default function PhoneVerify() {
         <MessageCircle size={18} className="text-emerald-500" />
         <h3 className="font-bold">WhatsApp Verification</h3>
       </div>
-      <p className="text-sm text-slate-400">Verify your WhatsApp number to enable withdrawals. A code will be sent to your WhatsApp.</p>
+      <p className="text-sm text-slate-400">Verify your WhatsApp number to enable withdrawals. Admin will send a code to your WhatsApp.</p>
 
       {error && (
         <div className="flex items-start gap-2 rounded-xl bg-rose-50 p-3 text-sm text-rose-600 dark:bg-rose-500/10">
@@ -118,17 +116,17 @@ export default function PhoneVerify() {
               disabled={step === 'sending'}
             />
           </div>
-          <p className="text-[11px] text-slate-400">⚠️ Enter YOUR WhatsApp number only. Code will be delivered directly to that number's WhatsApp.</p>
+          <p className="text-[11px] text-slate-400">⚠️ Enter YOUR WhatsApp number only. Admin will send code directly to this number.</p>
           <button onClick={sendCode} disabled={busy || step === 'sending'} className="btn-primary w-full gap-2">
             <Send size={16} />
-            {step === 'sending' ? 'Sending…' : 'Send Verification Code'}
+            {step === 'sending' ? 'Submitting…' : 'Request Verification'}
           </button>
         </>
       ) : (
         <>
-          <div className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-500/10">
-            <MessageCircle size={16} className="shrink-0" />
-            <span>Code sent to <strong>+91 {phone}</strong>. Check your WhatsApp messages.</span>
+          <div className="flex items-center gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+            <Clock size={16} className="shrink-0" />
+            <span>Waiting for admin to send code to <strong>+91 {phone}</strong>. Check your WhatsApp.</span>
           </div>
           <input
             className="input text-center text-lg tracking-[0.4em]"
@@ -144,7 +142,7 @@ export default function PhoneVerify() {
             <button onClick={() => { setStep('input'); setCode(''); setError('') }} className="btn-soft">Change</button>
           </div>
           <button onClick={sendCode} disabled={busy} className="text-xs font-medium text-brand-600 underline">
-            Resend code
+            Resend request
           </button>
         </>
       )}
