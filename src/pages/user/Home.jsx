@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
 import { rupee, niceError } from '../../lib/format'
+import AnnouncementBanner from '../../components/AnnouncementBanner'
 
 // Fixed category list — mirrors the admin panel's category options.
 const ALL_CATEGORIES = ['Gaming', 'Productivity', 'Social', 'Entertainment', 'Education', 'Finance', 'Health', 'Shopping', 'Tools', 'Other']
@@ -106,6 +107,9 @@ export default function Home() {
 
   return (
     <div className="space-y-4">
+      {/* Announcements */}
+      <AnnouncementBanner />
+
       {/* Daily claim */}
       <div className="card">
         <div className="flex items-center justify-between">

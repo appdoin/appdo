@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
 import { rupee, niceError } from '../../lib/format'
+import { generateFingerprint } from '../../lib/fingerprint'
 
 export default function AppDetail() {
   const { id } = useParams()
@@ -112,10 +113,15 @@ export default function AppDetail() {
       if (upErr) throw upErr
       const { data: pub } = supabase.storage.from('proofs').getPublicUrl(path)
 
+      // Generate device fingerprint for anti-fraud
+      let fingerprint = null
+      try { fingerprint = await generateFingerprint() } catch {}
+
       const { error } = await supabase.rpc('submit_review', {
         p_app_id: id,
         p_review_text: text,
         p_screenshot_url: pub.publicUrl,
+        ...(fingerprint && { p_device_fingerprint: fingerprint }),
       })
       if (error) throw error
       toast.success('Proof submitted! Reward credited after approval.')

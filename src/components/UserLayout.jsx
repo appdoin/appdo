@@ -1,6 +1,7 @@
 import { Outlet, useLocation, NavLink } from 'react-router-dom'
 import { Home, Trophy, History, Wallet, User, Sun, Moon, Bell } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { useNotifications } from '../context/NotificationsContext'
 import { useTheme } from '../hooks/useTheme'
 import { rupee } from '../lib/format'
 
@@ -10,6 +11,8 @@ const TITLES = {
   '/history': 'Review History',
   '/wallet': 'Wallet',
   '/profile': 'Profile',
+  '/notifications': 'Notifications',
+  '/referral': 'Referral',
 }
 
 const NAV = [
@@ -22,6 +25,7 @@ const NAV = [
 
 export default function UserLayout() {
   const { profile } = useAuth()
+  const { unreadCount } = useNotifications()
   const { dark, toggle } = useTheme()
   const { pathname } = useLocation()
   const title = TITLES[pathname] || (pathname.startsWith('/app/') ? '' : 'RewardReview')
@@ -50,9 +54,14 @@ export default function UserLayout() {
           <button onClick={toggle} className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 dark:border-slate-700">
             {dark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
-          <button className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 dark:border-slate-700">
+          <NavLink to="/notifications" className="relative grid h-9 w-9 place-items-center rounded-full border border-slate-200 dark:border-slate-700">
             <Bell size={16} />
-          </button>
+            {unreadCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-[16px] place-items-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </NavLink>
           <NavLink
             to="/wallet"
             className="badge bg-emerald-50 text-emerald-600 px-3 py-2 dark:bg-emerald-500/10 dark:text-emerald-400"

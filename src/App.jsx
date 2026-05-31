@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import { NotificationsProvider } from './context/NotificationsContext'
 
 import AuthPage from './pages/auth/AuthPage'
 import ResetPassword from './pages/auth/ResetPassword'
@@ -11,6 +12,8 @@ import Rewards from './pages/user/Rewards'
 import History from './pages/user/History'
 import Wallet from './pages/user/Wallet'
 import Profile from './pages/user/Profile'
+import Notifications from './pages/user/Notifications'
+import Referral from './pages/user/Referral'
 
 function Splash() {
   return (
@@ -24,7 +27,7 @@ function Protected({ children }) {
   const { session, loading } = useAuth()
   if (loading) return <Splash />
   if (!session) return <Navigate to="/login" replace />
-  return children
+  return <NotificationsProvider userId={session.user.id}>{children}</NotificationsProvider>
 }
 
 export default function App() {
@@ -46,6 +49,8 @@ export default function App() {
         <Route path="/history" element={<History />} />
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/referral" element={<Referral />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
