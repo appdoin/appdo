@@ -76,8 +76,8 @@ export default function UserLayout() {
       </header>
 
       {/* Page content */}
-      <main className="relative z-10 min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-4 pb-24">
-        <div className="animate-stagger h-full">
+      <main className={`relative z-10 min-w-0 flex-1 px-4 ${pathname === '/' ? 'overflow-hidden pb-20 pt-3' : 'py-4 pb-24'}`}>
+        <div className={pathname === '/' ? 'h-full' : 'animate-stagger'}>
           <Outlet />
         </div>
       </main>

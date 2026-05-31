@@ -190,7 +190,7 @@ export default function Rewards() {
           <h3 className="text-sm font-bold">Earnings Goal</h3>
         </div>
         <div className="flex items-end justify-between">
-          <p className="text-xl font-extrabold text-emerald-500">{rupee(earned)}</p>
+          <p className="text-xl font-extrabold text-emerald-500 shimmer-text">{rupee(earned)}</p>
           <p className="text-xs text-slate-400">Goal: {rupee(goal)}</p>
         </div>
         <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
