@@ -276,6 +276,7 @@ returns jsonb language plpgsql security definer set search_path = public as $$
 declare
   v_code text;
   v_exp  int := coalesce(nullif(public.get_setting_text('otp_expiry_minutes'),'')::int, 10);
+  v_recent int;
 begin
   if auth.uid() is null then raise exception 'NOT_AUTHENTICATED'; end if;
 
@@ -283,12 +284,22 @@ begin
     raise exception 'PHONE_ALREADY_USED';
   end if;
 
+  -- Rate limit: max 3 OTP requests per hour
+  select count(*) into v_recent
+  from public.phone_verifications
+  where user_id = auth.uid() and created_at > now() - interval '1 hour';
+
+  if v_recent >= 3 then
+    raise exception 'TOO_MANY_OTP_REQUESTS';
+  end if;
+
   v_code := lpad((floor(random()*1000000))::int::text, 6, '0');
 
   insert into public.phone_verifications(user_id, phone, code, expires_at)
   values (auth.uid(), p_phone, v_code, now() + (v_exp || ' minutes')::interval);
 
-  return jsonb_build_object('phone', p_phone, 'code', v_code, 'expires_minutes', v_exp);
+  -- SECURITY: Do NOT return the code. Edge Function reads from DB via get_latest_otp.
+  return jsonb_build_object('phone', p_phone, 'expires_minutes', v_exp, 'sent', true);
 end;
 $$;
 

@@ -12,24 +12,68 @@ export const formatDate = (d) =>
   })
 
 // Lightweight device fingerprint (stable per browser/device).
+// Persists across localStorage clears using multiple storage fallbacks.
 export function getDeviceId() {
-  let id = localStorage.getItem('device_id')
-  if (id) return id
+  const STORAGE_KEY = 'device_id'
+  const COOKIE_KEY = 'rr_did'
+
+  // Try localStorage first
+  let id = localStorage.getItem(STORAGE_KEY)
+  if (id) {
+    // Also persist to cookie for redundancy
+    setCookie(COOKIE_KEY, id, 365)
+    return id
+  }
+
+  // Try cookie fallback (survives "Clear Site Data" in some browsers)
+  id = getCookie(COOKIE_KEY)
+  if (id) {
+    localStorage.setItem(STORAGE_KEY, id)
+    return id
+  }
+
+  // Try sessionStorage (survives within same tab)
+  id = sessionStorage.getItem(STORAGE_KEY)
+  if (id) {
+    localStorage.setItem(STORAGE_KEY, id)
+    setCookie(COOKIE_KEY, id, 365)
+    return id
+  }
+
+  // Generate new device ID using hardware signals for extra entropy
   const raw = [
     navigator.userAgent,
     navigator.language,
     screen.width + 'x' + screen.height,
+    screen.colorDepth,
     new Date().getTimezoneOffset(),
     navigator.hardwareConcurrency || '',
+    navigator.maxTouchPoints || 0,
+    navigator.deviceMemory || '',
   ].join('|')
   let hash = 0
   for (let i = 0; i < raw.length; i++) {
     hash = (hash << 5) - hash + raw.charCodeAt(i)
     hash |= 0
   }
-  id = 'dev_' + Math.abs(hash).toString(36) + '_' + Math.random().toString(36).slice(2, 8)
-  localStorage.setItem('device_id', id)
+  id = 'dev_' + Math.abs(hash).toString(36) + '_' + Date.now().toString(36)
+
+  // Persist everywhere
+  localStorage.setItem(STORAGE_KEY, id)
+  sessionStorage.setItem(STORAGE_KEY, id)
+  setCookie(COOKIE_KEY, id, 365)
   return id
+}
+
+function setCookie(name, value, days) {
+  const d = new Date()
+  d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000)
+  document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;SameSite=Lax`
+}
+
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
+  return match ? match[2] : null
 }
 
 // Friendly messages for backend error codes
@@ -50,6 +94,7 @@ const ERR = {
   UPI_REQUIRED: 'Please set your UPI ID first.',
   REVIEW_BLOCKED_FRAUD: 'Review blocked. Your account has been flagged for suspicious activity.',
   ACCOUNT_BANNED: 'Your account has been suspended. Contact support.',
+  TOO_MANY_OTP_REQUESTS: 'Too many OTP requests. Wait 1 hour and try again.',
 }
 
 export function niceError(error) {

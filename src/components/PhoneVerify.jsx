@@ -1,25 +1,31 @@
-import { useState, useRef } from 'react'
-import { ShieldCheck, MessageCircle, Send } from 'lucide-react'
+import { useState } from 'react'
+import { ShieldCheck, MessageCircle, Send, AlertTriangle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from './Toast'
 import { niceError } from '../lib/format'
 
-// WhatsApp self-redirect OTP:
-// 1. Server generates code → returns it
-// 2. Browser opens wa.me link to user's OWN number with code in message
-// 3. User sends msg to themselves → code visible in WhatsApp
-// 4. User enters code → verified
-// Security: anti-duplicate (device + phone + email) prevents abuse.
+// SECURE WhatsApp OTP flow:
+// 1. Frontend sends phone to Edge Function (send-whatsapp-otp)
+// 2. Edge Function generates OTP server-side, stores in DB
+// 3. Edge Function delivers code via CallMeBot to the target number
+// 4. Code is NEVER returned to the browser
+// 5. User receives code on their WhatsApp and enters it
+// 6. Frontend verifies via RPC (verify_phone_otp)
+//
+// Security:
+// - Code never exposed to frontend
+// - Phone checked for duplicates server-side before sending
+// - Rate limited by DB (max 5 attempts)
 
 export default function PhoneVerify() {
   const { profile, refreshProfile } = useAuth()
   const toast = useToast()
   const [phone, setPhone] = useState(profile?.phone || '')
   const [code, setCode] = useState('')
-  const [sent, setSent] = useState(false)
+  const [step, setStep] = useState('input') // input | sending | verify
   const [busy, setBusy] = useState(false)
-  const linkRef = useRef(null)
+  const [error, setError] = useState('')
 
   if (profile?.phone_verified) {
     return (
@@ -36,26 +42,34 @@ export default function PhoneVerify() {
   }
 
   const sendCode = async () => {
-    if (!/^\d{10}$/.test(phone)) return toast.error('Enter a valid 10-digit number.')
+    const cleanPhone = phone.replace(/\D/g, '')
+    if (!/^\d{10}$/.test(cleanPhone)) return toast.error('Enter a valid 10-digit number.')
+    setError('')
     setBusy(true)
+    setStep('sending')
     try {
-      const { data, error } = await supabase.rpc('request_phone_otp', { p_phone: phone })
-      if (error) throw error
+      // Call Edge Function — code is sent server-side, NEVER returned to browser
+      const { data, error: fnErr } = await supabase.functions.invoke('send-whatsapp-otp', {
+        body: { phone: cleanPhone },
+      })
 
-      // Build WhatsApp self-message link
-      const msg = `🔐 RewardReview Verification\n\nYour code: *${data.code}*\n\nValid for ${data.expires_minutes} min.\n⚠️ Do NOT share this code.`
-      const waUrl = `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`
-
-      setSent(true)
-      toast.success('Opening WhatsApp…')
-
-      // Open WhatsApp via hidden <a> tag (avoids popup blocker)
-      if (linkRef.current) {
-        linkRef.current.href = waUrl
-        linkRef.current.click()
+      if (fnErr) throw fnErr
+      if (data?.error) {
+        // Handle specific errors
+        if (data.error.includes('PHONE_ALREADY_USED')) {
+          setError('This number is already verified on another account.')
+          setStep('input')
+          setBusy(false)
+          return
+        }
+        throw new Error(data.error)
       }
+
+      setStep('verify')
+      toast.success('Code sent to your WhatsApp! Check your messages.')
     } catch (err) {
-      toast.error(niceError(err))
+      setError(niceError(err))
+      setStep('input')
     } finally {
       setBusy(false)
     }
@@ -63,13 +77,14 @@ export default function PhoneVerify() {
 
   const verify = async () => {
     setBusy(true)
+    setError('')
     try {
-      const { error } = await supabase.rpc('verify_phone_otp', { p_code: code })
-      if (error) throw error
+      const { error: verErr } = await supabase.rpc('verify_phone_otp', { p_code: code })
+      if (verErr) throw verErr
       toast.success('Phone verified! 🎉')
       refreshProfile()
     } catch (err) {
-      toast.error(niceError(err))
+      setError(niceError(err))
     } finally {
       setBusy(false)
     }
@@ -77,16 +92,20 @@ export default function PhoneVerify() {
 
   return (
     <div className="card space-y-3">
-      {/* Hidden anchor for WhatsApp redirect */}
-      <a ref={linkRef} href="#" target="_blank" rel="noopener noreferrer" className="hidden" aria-hidden="true" />
-
       <div className="flex items-center gap-2">
         <MessageCircle size={18} className="text-emerald-500" />
         <h3 className="font-bold">WhatsApp Verification</h3>
       </div>
-      <p className="text-sm text-slate-400">Verify your WhatsApp number to enable withdrawals.</p>
+      <p className="text-sm text-slate-400">Verify your WhatsApp number to enable withdrawals. A code will be sent to your WhatsApp.</p>
 
-      {!sent ? (
+      {error && (
+        <div className="flex items-start gap-2 rounded-xl bg-rose-50 p-3 text-sm text-rose-600 dark:bg-rose-500/10">
+          <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {step === 'input' || step === 'sending' ? (
         <>
           <div className="flex gap-2">
             <span className="flex items-center rounded-xl bg-slate-100 px-3 text-sm font-semibold dark:bg-slate-800">+91</span>
@@ -96,18 +115,20 @@ export default function PhoneVerify() {
               value={phone}
               maxLength={10}
               onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+              disabled={step === 'sending'}
             />
           </div>
-          <button onClick={sendCode} disabled={busy} className="btn-primary w-full gap-2">
+          <p className="text-[11px] text-slate-400">⚠️ Enter YOUR WhatsApp number only. Code will be delivered directly to that number's WhatsApp.</p>
+          <button onClick={sendCode} disabled={busy || step === 'sending'} className="btn-primary w-full gap-2">
             <Send size={16} />
-            {busy ? 'Sending…' : 'Send Code via WhatsApp'}
+            {step === 'sending' ? 'Sending…' : 'Send Verification Code'}
           </button>
         </>
       ) : (
         <>
-          <div className="flex items-center gap-2 rounded-xl bg-green-50 p-3 text-sm text-green-700 dark:bg-green-500/10">
+          <div className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-500/10">
             <MessageCircle size={16} className="shrink-0" />
-            <span>WhatsApp open hua hoga. Message send karo apne aap ko, phir code neeche enter karo.</span>
+            <span>Code sent to <strong>+91 {phone}</strong>. Check your WhatsApp messages.</span>
           </div>
           <input
             className="input text-center text-lg tracking-[0.4em]"
@@ -120,8 +141,11 @@ export default function PhoneVerify() {
             <button onClick={verify} disabled={busy || code.length < 6} className="btn-primary flex-1">
               {busy ? 'Verifying…' : 'Verify'}
             </button>
-            <button onClick={() => { setSent(false); setCode('') }} className="btn-soft">Change</button>
+            <button onClick={() => { setStep('input'); setCode(''); setError('') }} className="btn-soft">Change</button>
           </div>
+          <button onClick={sendCode} disabled={busy} className="text-xs font-medium text-brand-600 underline">
+            Resend code
+          </button>
         </>
       )}
     </div>
