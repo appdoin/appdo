@@ -106,143 +106,148 @@ export default function Home() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Announcements */}
-      <AnnouncementBanner />
+    <div className="flex h-full flex-col -mx-4 -my-4">
+      {/* Fixed top section */}
+      <div className="shrink-0 space-y-3 px-4 pt-4 pb-2">
+        {/* Announcements */}
+        <AnnouncementBanner />
 
-      {/* Daily claim */}
-      <div className="card relative overflow-hidden py-3 animate-fade-in">
-        <div className="decor-leaf leaf-3" style={{ opacity: 0.08 }} />
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className={`grid h-8 w-8 place-items-center rounded-full transition-all duration-300 ${claim.claimedToday ? 'bg-emerald-100 text-emerald-600 animate-pop' : 'bg-brand-100 text-brand-600 animate-pulse-soft'}`}>
-              {claim.claimedToday ? <Check size={16} /> : <Flame size={16} />}
+        {/* Daily claim */}
+        <div className="card relative overflow-hidden py-3 animate-fade-in">
+          <div className="decor-leaf leaf-3" style={{ opacity: 0.08 }} />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`grid h-8 w-8 place-items-center rounded-full transition-all duration-300 ${claim.claimedToday ? 'bg-emerald-100 text-emerald-600 animate-pop' : 'bg-brand-100 text-brand-600 animate-pulse-soft'}`}>
+                {claim.claimedToday ? <Check size={16} /> : <Flame size={16} />}
+              </div>
+              <div>
+                <p className="text-sm font-bold">{claim.claimedToday ? 'Claimed Today!' : 'Daily Reward'}</p>
+                <p className="flex items-center gap-1 text-xs text-slate-400">
+                  <Flame size={10} className="text-orange-400" /> {claim.day || 0} day streak
+                </p>
+              </div>
             </div>
+            {!claim.claimedToday && (
+              <button onClick={doClaim} disabled={claiming} className="btn-soft py-1.5 text-xs">
+                {claiming ? '…' : 'Claim'}
+              </button>
+            )}
+          </div>
+          <div className="mt-2 flex justify-between gap-1">
+            {[1, 2, 3, 4, 5, 6, 7].map((d) => (
+              <div
+                key={d}
+                className={`grid h-7 w-7 place-items-center rounded-full text-xs font-semibold transition-all ${
+                  d <= claim.day ? 'bg-emerald-500 text-white scale-105' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'
+                }`}
+              >
+                {d}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Balance / potential */}
+        <div className="gradient-brand relative overflow-hidden rounded-2xl p-4 text-white shadow-md shadow-brand-500/30 animate-slide-up">
+          <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-white/10 blur-xl animate-pulse-soft" />
+          <div className="absolute -bottom-10 left-10 h-16 w-16 rounded-full bg-white/5 blur-xl" />
+          <div className="decor-leaf leaf-1" />
+          <div className="decor-leaf leaf-2" />
+          <div className="relative flex items-start justify-between">
             <div>
-              <p className="text-sm font-bold">{claim.claimedToday ? 'Claimed Today!' : 'Daily Reward'}</p>
-              <p className="flex items-center gap-1 text-xs text-slate-400">
-                <Flame size={10} className="text-orange-400" /> {claim.day || 0} day streak
-              </p>
+              <p className="text-xs text-white/80">Your Balance</p>
+              <p className="mt-0.5 text-2xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-white/80">Potential Earnings</p>
+              <p className="mt-0.5 text-xl font-bold">{rupee(potential)}</p>
+              <p className="text-xs text-white/70">From {apps.filter((a) => !reviewed[a.id]).length} available apps</p>
             </div>
           </div>
-          {!claim.claimedToday && (
-            <button onClick={doClaim} disabled={claiming} className="btn-soft py-1.5 text-xs">
-              {claiming ? '…' : 'Claim'}
-            </button>
-          )}
         </div>
-        <div className="mt-2 flex justify-between gap-1">
-          {[1, 2, 3, 4, 5, 6, 7].map((d) => (
-            <div
-              key={d}
-              className={`grid h-7 w-7 place-items-center rounded-full text-xs font-semibold ${
-                d <= claim.day ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'
+
+        {/* Categories — horizontally scrollable strip (drag + wheel + touch) */}
+        <div
+          ref={catRef}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+          onPointerLeave={endDrag}
+          onWheel={onWheel}
+          className="no-scrollbar flex w-full cursor-grab gap-2 overflow-x-scroll py-1 active:cursor-grabbing"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          {categories.map((c) => (
+            <button
+              key={c}
+              onClick={() => {
+                if (drag.current.moved) return
+                setCat(c)
+              }}
+              className={`flex shrink-0 select-none items-center gap-1 whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold transition active:scale-95 ${
+                cat === c
+                  ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/40'
+                  : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
               }`}
             >
-              {d}
-            </div>
+              {c === 'All' && <Grid3x3 size={13} />}
+              {c}
+            </button>
           ))}
         </div>
-      </div>
 
-      {/* Balance / potential */}
-      <div className="gradient-brand relative overflow-hidden rounded-2xl p-4 text-white shadow-md shadow-brand-500/30 animate-slide-up">
-        <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-white/10 blur-xl animate-pulse-soft" />
-        <div className="absolute -bottom-10 left-10 h-16 w-16 rounded-full bg-white/5 blur-xl" />
-        <div className="decor-leaf leaf-1" />
-        <div className="decor-leaf leaf-2" />
-        <div className="relative flex items-start justify-between">
-          <div>
-            <p className="text-xs text-white/80">Your Balance</p>
-            <p className="mt-0.5 text-2xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-white/80">Potential Earnings</p>
-            <p className="mt-0.5 text-xl font-bold">{rupee(potential)}</p>
-            <p className="text-xs text-white/70">From {apps.filter((a) => !reviewed[a.id]).length} available apps</p>
-          </div>
+        {/* Search */}
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-3 text-slate-400" />
+          <input className="input py-2.5 pl-9 text-sm" placeholder="Search apps…" value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
       </div>
 
-      {/* Categories — horizontally scrollable strip (drag + wheel + touch) */}
-      <div
-        ref={catRef}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerLeave={endDrag}
-        onWheel={onWheel}
-        className="no-scrollbar flex w-full cursor-grab gap-2 overflow-x-scroll py-1 active:cursor-grabbing"
-        style={{ WebkitOverflowScrolling: 'touch' }}
-      >
-        {categories.map((c) => (
-          <button
-            key={c}
-            onClick={() => {
-              if (drag.current.moved) return
-              setCat(c)
-            }}
-            className={`flex shrink-0 select-none items-center gap-1 whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold transition active:scale-95 ${
-              cat === c
-                ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/40'
-                : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
-            }`}
-          >
-            {c === 'All' && <Grid3x3 size={13} />}
-            {c}
-          </button>
-        ))}
-      </div>
-
-      {/* Search */}
-      <div className="relative">
-        <Search size={18} className="absolute left-3 top-3.5 text-slate-400" />
-        <input className="input pl-10" placeholder="Search apps…" value={q} onChange={(e) => setQ(e.target.value)} />
-      </div>
-
-      {/* Apps */}
-      <div className="space-y-3">
-        {filtered.length === 0 && <p className="py-10 text-center text-slate-400">No apps found.</p>}
-        {filtered.map((a, idx) => {
-          const status = reviewed[a.id]
-          return (
-            <button
-              key={a.id}
-              onClick={() => nav(`/app/${a.id}`)}
-              disabled={!!status}
-              style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}
-              className="card-hover flex w-full animate-slide-up items-center gap-2.5 text-left disabled:opacity-60"
-            >
-              {a.icon_url ? (
-                <img src={a.icon_url} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
-              ) : (
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-100 text-lg font-bold text-brand-600">
-                  {a.name[0]}
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold">{a.name}</p>
-                <p className="truncate text-xs text-slate-400">{a.description}</p>
-                <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400">
-                  <span>{a.slots_left} slots</span>
-                  <span className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-800">{a.category}</span>
-                  <span className="flex items-center gap-0.5"><Clock size={10} /> ~{a.est_time_min}m</span>
-                  {a.two_step && <span className="rounded bg-violet-100 px-1 py-0.5 font-semibold text-violet-600 dark:bg-violet-500/15">2-Step</span>}
-                </div>
-              </div>
-              <div className="flex shrink-0 flex-col items-end gap-1">
-                <span className="badge bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-600 dark:bg-emerald-500/10">{rupee(a.reward_amount)}</span>
-                {status ? (
-                  <span className={`text-xs font-semibold capitalize ${status === 'approved' ? 'text-emerald-500' : status === 'rejected' ? 'text-rose-500' : 'text-amber-500'}`}>
-                    {status}
-                  </span>
+      {/* Scrollable apps list */}
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+        <div className="space-y-2.5">
+          {filtered.length === 0 && <p className="py-10 text-center text-slate-400">No apps found.</p>}
+          {filtered.map((a, idx) => {
+            const status = reviewed[a.id]
+            return (
+              <button
+                key={a.id}
+                onClick={() => nav(`/app/${a.id}`)}
+                disabled={!!status}
+                style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}
+                className="card-hover flex w-full animate-slide-up items-center gap-2.5 text-left disabled:opacity-60"
+              >
+                {a.icon_url ? (
+                  <img src={a.icon_url} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
                 ) : (
-                  <ChevronRight size={15} className="text-brand-500" />
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-100 text-lg font-bold text-brand-600">
+                    {a.name[0]}
+                  </div>
                 )}
-              </div>
-            </button>
-          )
-        })}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold">{a.name}</p>
+                  <p className="truncate text-xs text-slate-400">{a.description}</p>
+                  <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400">
+                    <span>{a.slots_left} slots</span>
+                    <span className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-800">{a.category}</span>
+                    <span className="flex items-center gap-0.5"><Clock size={10} /> ~{a.est_time_min}m</span>
+                    {a.two_step && <span className="rounded bg-violet-100 px-1 py-0.5 font-semibold text-violet-600 dark:bg-violet-500/15">2-Step</span>}
+                  </div>
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <span className="badge bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-600 dark:bg-emerald-500/10">{rupee(a.reward_amount)}</span>
+                  {status ? (
+                    <span className={`text-xs font-semibold capitalize ${status === 'approved' ? 'text-emerald-500' : status === 'rejected' ? 'text-rose-500' : 'text-amber-500'}`}>
+                      {status}
+                    </span>
+                  ) : (
+                    <ChevronRight size={15} className="text-brand-500" />
+                  )}
+                </div>
+              </button>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
