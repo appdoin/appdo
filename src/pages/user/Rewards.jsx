@@ -119,17 +119,49 @@ export default function Rewards() {
 
   return (
     <div className="space-y-4">
-      {/* Spin — shown first / at top */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-3 shadow-lg shadow-purple-500/30 animate-fade-in">
+      {/* Earnings goal — ABOVE spin */}
+      <div className="card py-3">
+        <div className="mb-1 flex items-center gap-1.5">
+          <Target size={14} className="text-brand-500" />
+          <h3 className="text-sm font-bold">Earnings Goal</h3>
+        </div>
+        <div className="flex items-end justify-between">
+          <p className="text-xl font-extrabold text-emerald-500 shimmer-text">{rupee(earned)}</p>
+          <p className="text-xs text-slate-400">Goal: {rupee(goal)}</p>
+        </div>
+        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+          <div className="h-full rounded-full bg-brand-500 transition-all" style={{ width: pct + '%' }} />
+        </div>
+        <div className="mt-1 flex items-center justify-between text-[10px]">
+          <span className="text-slate-400">{pct}% complete</span>
+          {earned < goal && (
+            <span className="font-semibold text-brand-600">~{reviewsToGo} reviews to {rupee(goal)}</span>
+          )}
+        </div>
+        <div className="no-scrollbar mt-2 -mx-1 flex gap-2 overflow-x-auto px-1">
+          {GOAL_OPTIONS.map((g) => (
+            <button
+              key={g}
+              onClick={() => pickGoal(g)}
+              className={`chip shrink-0 px-3 py-1 text-xs ${goal === g ? 'border border-brand-500 bg-brand-50 text-brand-600 dark:bg-brand-500/10' : 'bg-slate-50 text-slate-500 dark:bg-slate-800 dark:text-slate-300'}`}
+            >
+              {goalLabel(g)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Spin */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-4 shadow-lg shadow-purple-500/30 animate-fade-in">
         {/* decorative blobs */}
         <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-white/10 blur-2xl animate-pulse-soft" />
         <div className="absolute -bottom-8 left-4 h-14 w-14 rounded-full bg-white/5 blur-2xl animate-float" />
         <div className="decor-leaf leaf-1" style={{ opacity: 0.2 }} />
         <div className="decor-leaf leaf-3" style={{ opacity: 0.15 }} />
         <p className="mb-0.5 text-center text-sm font-extrabold text-white">🎰 Daily Lucky Spin</p>
-        <p className="mb-2 text-center text-[10px] text-white/70">{spunToday ? 'Come back tomorrow!' : 'Spin once a day to win rewards'}</p>
+        <p className="mb-3 text-center text-[10px] text-white/70">{spunToday ? 'Come back tomorrow!' : 'Spin once a day to win rewards'}</p>
         {/* wheel + pointer */}
-        <div className="relative mx-auto h-40 w-40">
+        <div className="relative mx-auto h-56 w-56">
           {/* outer glow ring */}
           <div className="absolute inset-0 rounded-full animate-glow" />
           {/* pointer triangle */}
@@ -138,7 +170,7 @@ export default function Rewards() {
           </div>
           <svg
             viewBox="0 0 200 200"
-            className="h-full w-full drop-shadow-xl transition-transform duration-[4000ms] ease-out"
+            className="h-full w-full drop-shadow-2xl transition-transform duration-[4000ms] ease-out"
             style={{ transform: `rotate(${rotation}deg)` }}
           >
             {segments.map((amt, i) => {
@@ -168,7 +200,7 @@ export default function Rewards() {
           <button
             onClick={spin}
             disabled={spinning || spunToday}
-            className="absolute left-1/2 top-1/2 z-10 h-9 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white text-[9px] font-extrabold text-brand-600 shadow-md transition active:scale-95 disabled:opacity-60"
+            className="absolute left-1/2 top-1/2 z-10 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white text-[10px] font-extrabold text-brand-600 shadow-lg transition active:scale-95 disabled:opacity-60 animate-glow"
           >
             {spinning ? '…' : spunToday ? 'DONE' : 'SPIN'}
           </button>
@@ -183,37 +215,7 @@ export default function Rewards() {
         )}
       </div>
 
-      {/* Earnings goal */}
-      <div className="card py-3">
-        <div className="mb-1 flex items-center gap-1.5">
-          <Target size={14} className="text-brand-500" />
-          <h3 className="text-sm font-bold">Earnings Goal</h3>
-        </div>
-        <div className="flex items-end justify-between">
-          <p className="text-xl font-extrabold text-emerald-500 shimmer-text">{rupee(earned)}</p>
-          <p className="text-xs text-slate-400">Goal: {rupee(goal)}</p>
-        </div>
-        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-          <div className="h-full rounded-full bg-brand-500 transition-all" style={{ width: pct + '%' }} />
-        </div>
-        <div className="mt-1 flex items-center justify-between text-[10px]">
-          <span className="text-slate-400">{pct}% complete</span>
-          {earned < goal && (
-            <span className="font-semibold text-brand-600">~{reviewsToGo} reviews to {rupee(goal)}</span>
-          )}
-        </div>
-        <div className="no-scrollbar mt-3 -mx-1 flex gap-2 overflow-x-auto px-1">
-          {GOAL_OPTIONS.map((g) => (
-            <button
-              key={g}
-              onClick={() => pickGoal(g)}
-              className={`chip shrink-0 ${goal === g ? 'border border-brand-500 bg-brand-50 text-brand-600 dark:bg-brand-500/10' : 'bg-slate-50 text-slate-500 dark:bg-slate-800 dark:text-slate-300'}`}
-            >
-              {goalLabel(g)}
-            </button>
-          ))}
-        </div>
-      </div>
+
 
       {/* Quick stats */}
       <div className="grid grid-cols-2 gap-2">
