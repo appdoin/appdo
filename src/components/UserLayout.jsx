@@ -40,33 +40,33 @@ export default function UserLayout() {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col bg-slate-100 dark:bg-slate-950">
       {/* Header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-slate-200/70 bg-white/90 px-4 py-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500 font-bold text-white">
+      <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-slate-200/70 bg-white/90 px-3 py-2 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
+        <div className="flex items-center gap-2">
+          <div className="grid h-8 w-8 place-items-center rounded-lg bg-brand-500 text-sm font-bold text-white">
             {initials}
           </div>
           <div>
-            <h1 className="text-lg font-bold leading-tight">{title}</h1>
+            <h1 className="text-base font-bold leading-tight">{title}</h1>
             <p className="text-xs text-slate-400">{profile?.full_name}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={toggle} className="grid h-9 w-9 place-items-center rounded-full border border-slate-200 dark:border-slate-700">
-            {dark ? <Sun size={16} /> : <Moon size={16} />}
+        <div className="flex items-center gap-1.5">
+          <button onClick={toggle} className="grid h-7 w-7 place-items-center rounded-full border border-slate-200 dark:border-slate-700">
+            {dark ? <Sun size={13} /> : <Moon size={13} />}
           </button>
-          <NavLink to="/notifications" className="relative grid h-9 w-9 place-items-center rounded-full border border-slate-200 dark:border-slate-700">
-            <Bell size={16} />
+          <NavLink to="/notifications" className="relative grid h-7 w-7 place-items-center rounded-full border border-slate-200 dark:border-slate-700">
+            <Bell size={13} />
             {unreadCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-[16px] place-items-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white">
+              <span className="absolute -right-0.5 -top-0.5 grid h-3.5 min-w-[14px] place-items-center rounded-full bg-rose-500 px-0.5 text-[8px] font-bold text-white">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
           </NavLink>
           <NavLink
             to="/wallet"
-            className="badge bg-emerald-50 text-emerald-600 px-3 py-2 dark:bg-emerald-500/10 dark:text-emerald-400"
+            className="badge bg-emerald-50 text-emerald-600 px-2 py-1 text-xs dark:bg-emerald-500/10 dark:text-emerald-400"
           >
-            <Wallet size={14} /> {rupee(profile?.wallet_balance)}
+            <Wallet size={12} /> {rupee(profile?.wallet_balance)}
           </NavLink>
         </div>
       </header>

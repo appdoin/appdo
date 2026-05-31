@@ -38,10 +38,10 @@ export default function History() {
     <div className="space-y-4">
       {/* Stats */}
       <div className="grid grid-cols-4 gap-2">
-        <div className="stat-card"><p className="text-lg font-bold text-emerald-500">{rupee(stats.earned)}</p><p className="text-xs text-slate-400">Earned</p></div>
-        <div className="stat-card"><p className="text-lg font-bold text-brand-600">{stats.done}</p><p className="text-xs text-slate-400">Done</p></div>
-        <div className="stat-card"><p className="text-lg font-bold text-amber-500">{stats.pending}</p><p className="text-xs text-slate-400">Pending</p></div>
-        <div className="stat-card"><p className="text-lg font-bold text-rose-500">{stats.rejected}</p><p className="text-xs text-slate-400">Rejected</p></div>
+        <div className="stat-card"><p className="text-sm font-bold text-emerald-500">{rupee(stats.earned)}</p><p className="text-xs text-slate-400">Earned</p></div>
+        <div className="stat-card"><p className="text-sm font-bold text-brand-600">{stats.done}</p><p className="text-xs text-slate-400">Done</p></div>
+        <div className="stat-card"><p className="text-sm font-bold text-amber-500">{stats.pending}</p><p className="text-xs text-slate-400">Pending</p></div>
+        <div className="stat-card"><p className="text-sm font-bold text-rose-500">{stats.rejected}</p><p className="text-xs text-slate-400">Rejected</p></div>
       </div>
 
       {/* Tabs */}
@@ -60,9 +60,9 @@ export default function History() {
           <div key={r.id} className="card">
             <div className="flex items-center gap-3">
               {r.apps?.icon_url ? (
-                <img src={r.apps.icon_url} alt="" className="h-12 w-12 rounded-xl object-cover" />
+                <img src={r.apps.icon_url} alt="" className="h-10 w-10 shrink-0 rounded-xl object-cover" />
               ) : (
-                <div className="grid h-12 w-12 place-items-center rounded-xl bg-brand-100 font-bold text-brand-600">{r.apps?.name?.[0] || '?'}</div>
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-100 text-sm font-bold text-brand-600">{r.apps?.name?.[0] || '?'}</div>
               )}
               <div className="flex-1">
                 <p className="font-bold">{r.apps?.name || 'App'}</p>

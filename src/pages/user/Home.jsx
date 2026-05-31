@@ -111,30 +111,30 @@ export default function Home() {
       <AnnouncementBanner />
 
       {/* Daily claim */}
-      <div className="card">
+      <div className="card py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`grid h-10 w-10 place-items-center rounded-full ${claim.claimedToday ? 'bg-emerald-100 text-emerald-600' : 'bg-brand-100 text-brand-600'}`}>
-              {claim.claimedToday ? <Check size={20} /> : <Flame size={20} />}
+          <div className="flex items-center gap-2">
+            <div className={`grid h-8 w-8 place-items-center rounded-full ${claim.claimedToday ? 'bg-emerald-100 text-emerald-600' : 'bg-brand-100 text-brand-600'}`}>
+              {claim.claimedToday ? <Check size={16} /> : <Flame size={16} />}
             </div>
             <div>
-              <p className="font-bold">{claim.claimedToday ? 'Claimed Today!' : 'Daily Reward'}</p>
+              <p className="text-sm font-bold">{claim.claimedToday ? 'Claimed Today!' : 'Daily Reward'}</p>
               <p className="flex items-center gap-1 text-xs text-slate-400">
-                <Flame size={12} className="text-orange-400" /> {claim.day || 0} day streak
+                <Flame size={10} className="text-orange-400" /> {claim.day || 0} day streak
               </p>
             </div>
           </div>
           {!claim.claimedToday && (
-            <button onClick={doClaim} disabled={claiming} className="btn-soft">
+            <button onClick={doClaim} disabled={claiming} className="btn-soft py-1.5 text-xs">
               {claiming ? '…' : 'Claim'}
             </button>
           )}
         </div>
-        <div className="mt-3 flex justify-between gap-1">
+        <div className="mt-2 flex justify-between gap-1">
           {[1, 2, 3, 4, 5, 6, 7].map((d) => (
             <div
               key={d}
-              className={`grid h-8 w-8 place-items-center rounded-full text-xs font-semibold ${
+              className={`grid h-7 w-7 place-items-center rounded-full text-xs font-semibold ${
                 d <= claim.day ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'
               }`}
             >
@@ -145,17 +145,17 @@ export default function Home() {
       </div>
 
       {/* Balance / potential */}
-      <div className="gradient-brand relative overflow-hidden rounded-2xl p-5 text-white shadow-lg shadow-brand-500/30 animate-slide-up">
-        <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 blur-xl" />
-        <div className="absolute -bottom-10 left-10 h-24 w-24 rounded-full bg-white/5 blur-xl" />
+      <div className="gradient-brand relative overflow-hidden rounded-2xl p-4 text-white shadow-md shadow-brand-500/30 animate-slide-up">
+        <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-white/10 blur-xl" />
+        <div className="absolute -bottom-10 left-10 h-16 w-16 rounded-full bg-white/5 blur-xl" />
         <div className="relative flex items-start justify-between">
           <div>
-            <p className="text-sm text-white/80">Your Balance</p>
-            <p className="mt-1 text-3xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
+            <p className="text-xs text-white/80">Your Balance</p>
+            <p className="mt-0.5 text-2xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-white/80">Potential Earnings</p>
-            <p className="mt-1 text-2xl font-bold">{rupee(potential)}</p>
+            <p className="text-xs text-white/80">Potential Earnings</p>
+            <p className="mt-0.5 text-xl font-bold">{rupee(potential)}</p>
             <p className="text-xs text-white/70">From {apps.filter((a) => !reviewed[a.id]).length} available apps</p>
           </div>
         </div>
