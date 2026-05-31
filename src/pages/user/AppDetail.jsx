@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
 import { rupee, niceError } from '../../lib/format'
-import { generateFingerprint } from '../../lib/fingerprint'
+import { generateFingerprint, detectSuspiciousEnv } from '../../lib/fingerprint'
 
 export default function AppDetail() {
   const { id } = useParams()
@@ -25,6 +25,8 @@ export default function AppDetail() {
   // Two-step state
   const [installation, setInstallation] = useState(null)
   const [markingInstall, setMarkingInstall] = useState(false)
+  // Fraud tracking: page open time
+  const pageOpenTime = useRef(Date.now())
 
   useEffect(() => {
     supabase.from('apps').select('*').eq('id', id).single().then(({ data }) => {
@@ -107,6 +109,14 @@ export default function AppDetail() {
     if (app?.two_step && !twoStepReady) return toast.error(`Please wait ${hoursLeft}h before submitting.`)
     setBusy(true)
     try {
+      // Check for suspicious environment
+      const envFlags = detectSuspiciousEnv()
+      if (envFlags.includes('emulator_detected')) {
+        toast.error('Emulators are not allowed. Use a real device.')
+        setBusy(false)
+        return
+      }
+
       const ext = file.name.split('.').pop()
       const path = `${session.user.id}/${id}-${Date.now()}.${ext}`
       const { error: upErr } = await supabase.storage.from('proofs').upload(path, file)
@@ -117,11 +127,15 @@ export default function AppDetail() {
       let fingerprint = null
       try { fingerprint = await generateFingerprint() } catch {}
 
+      // Calculate time spent on page
+      const timeSpent = Math.round((Date.now() - pageOpenTime.current) / 1000)
+
       const { error } = await supabase.rpc('submit_review', {
         p_app_id: id,
         p_review_text: text,
         p_screenshot_url: pub.publicUrl,
-        ...(fingerprint && { p_device_fingerprint: fingerprint }),
+        p_device_fingerprint: fingerprint,
+        p_time_spent_seconds: timeSpent,
       })
       if (error) throw error
       toast.success('Proof submitted! Reward credited after approval.')

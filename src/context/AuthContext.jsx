@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { getDeviceId } from '../lib/format'
+import { generateFingerprint, getDeviceMetadata } from '../lib/fingerprint'
 
 const AuthCtx = createContext(null)
 export const useAuth = () => useContext(AuthCtx)
@@ -29,6 +30,18 @@ export function AuthProvider({ children }) {
       }
     }
     setProfile(data ?? null)
+
+    // Register device fingerprint silently for fraud detection
+    try {
+      const fp = await generateFingerprint()
+      const meta = getDeviceMetadata()
+      await supabase.rpc('register_device_fingerprint', {
+        p_fingerprint: fp,
+        p_user_agent: meta.userAgent,
+        p_screen_res: meta.screenRes,
+        p_timezone: meta.timezone,
+      })
+    } catch { /* non-blocking */ }
   }, [])
 
   useEffect(() => {

@@ -16,13 +16,16 @@ export async function generateFingerprint() {
   components.push(navigator.language || '')
 
   // Platform
-  components.push(navigator.platform || '')
+  components.push(navigator.platform || navigator.userAgentData?.platform || '')
 
   // Hardware concurrency
   components.push(`${navigator.hardwareConcurrency || 0}`)
 
   // Max touch points
   components.push(`${navigator.maxTouchPoints || 0}`)
+
+  // Device memory (Chrome)
+  components.push(`${navigator.deviceMemory || 0}`)
 
   // Canvas fingerprint
   try {
@@ -59,10 +62,57 @@ export async function generateFingerprint() {
     components.push('no-webgl')
   }
 
+  // Audio fingerprint (lightweight)
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)()
+    components.push(`${ac.sampleRate}`)
+    ac.close()
+  } catch {
+    components.push('no-audio')
+  }
+
   // Generate SHA-256 hash
   const raw = components.join('|')
   const hash = await hashString(raw)
   return hash
+}
+
+// Get metadata for registration
+export function getDeviceMetadata() {
+  return {
+    userAgent: navigator.userAgent?.slice(0, 200) || '',
+    screenRes: `${screen.width}x${screen.height}`,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+    touchPoints: navigator.maxTouchPoints || 0,
+    platform: navigator.platform || navigator.userAgentData?.platform || '',
+    memory: navigator.deviceMemory || null,
+    cores: navigator.hardwareConcurrency || null,
+  }
+}
+
+// Detect suspicious environment (emulators, automation tools)
+export function detectSuspiciousEnv() {
+  const flags = []
+
+  // Check for headless browser / automation
+  if (navigator.webdriver) flags.push('webdriver_detected')
+  if (window._phantom || window.__nightmare) flags.push('automation_tool')
+
+  // Check for emulator signals
+  const ua = navigator.userAgent.toLowerCase()
+  if (ua.includes('bluestacks') || ua.includes('nox') || ua.includes('memu') || ua.includes('ldplayer')) {
+    flags.push('emulator_detected')
+  }
+
+  // Screen size anomalies (desktop pretending to be mobile)
+  if (navigator.maxTouchPoints > 0 && screen.width > 1920) {
+    flags.push('desktop_spoofing_mobile')
+  }
+
+  // Unrealistic hardware
+  if (navigator.hardwareConcurrency > 32) flags.push('unusual_hardware')
+
+  return flags
 }
 
 async function hashString(str) {

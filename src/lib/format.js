@@ -48,6 +48,8 @@ const ERR = {
   TOO_MANY_ATTEMPTS: 'Too many attempts. Request a new code.',
   NO_OTP_REQUESTED: 'Request a code first.',
   UPI_REQUIRED: 'Please set your UPI ID first.',
+  REVIEW_BLOCKED_FRAUD: 'Review blocked. Your account has been flagged for suspicious activity.',
+  ACCOUNT_BANNED: 'Your account has been suspended. Contact support.',
 }
 
 export function niceError(error) {
