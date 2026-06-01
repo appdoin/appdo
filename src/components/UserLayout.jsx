@@ -1,5 +1,5 @@
 import { Outlet, useLocation, NavLink } from 'react-router-dom'
-import { Home, Trophy, History, Wallet, User, Sun, Moon, Bell } from 'lucide-react'
+import { Home, Trophy, History, Wallet, User, Sun, Moon, Bell, HelpCircle, Gift } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useNotifications } from '../context/NotificationsContext'
 import { useTheme } from '../hooks/useTheme'
@@ -12,7 +12,8 @@ const TITLES = {
   '/wallet': 'Wallet',
   '/profile': 'Profile',
   '/notifications': 'Notifications',
-  '/referral': 'Referral',
+  '/referral': 'Refer & Earn',
+  '/help': 'Help & Support',
 }
 
 const NAV = [
@@ -55,6 +56,12 @@ export default function UserLayout() {
           </div>
         </div>
         <div className="flex items-center gap-1.5">
+          <NavLink to="/referral" className="grid h-7 w-7 place-items-center rounded-full border border-violet-200 text-violet-500 dark:border-violet-700">
+            <Gift size={13} />
+          </NavLink>
+          <NavLink to="/help" className="grid h-7 w-7 place-items-center rounded-full border border-slate-200 dark:border-slate-700">
+            <HelpCircle size={13} />
+          </NavLink>
           <button onClick={toggle} className="grid h-7 w-7 place-items-center rounded-full border border-slate-200 dark:border-slate-700">
             {dark ? <Sun size={13} /> : <Moon size={13} />}
           </button>

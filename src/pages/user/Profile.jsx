@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, NavLink } from 'react-router-dom'
-import { User as UserIcon, Save, LogOut, Award, Shield, Gift } from 'lucide-react'
+import { User as UserIcon, Save, LogOut, Award, Shield, Gift, HelpCircle, Users, IndianRupee } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
@@ -62,8 +62,32 @@ export default function Profile() {
         </a>
       )}
 
-      <NavLink to="/referral" className="card flex w-full items-center justify-between text-left">
-        <span className="flex items-center gap-2 font-bold text-violet-600"><Gift size={18} /> Refer &amp; Earn</span>
+      {/* Refer & Earn - Prominent Card */}
+      <NavLink to="/referral" className="card relative overflow-hidden bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/20">
+        <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-white/10 blur-xl" />
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/20">
+              <Gift size={20} />
+            </div>
+            <div>
+              <p className="font-bold">Refer & Earn ₹{profile?.referral_bonus || 10}</p>
+              <p className="text-xs text-white/80">Share code & earn on every referral!</p>
+            </div>
+          </div>
+          <span className="text-white/80">→</span>
+        </div>
+        {(profile?.total_referrals > 0) && (
+          <div className="relative mt-2 flex gap-3 border-t border-white/20 pt-2 text-xs">
+            <span className="flex items-center gap-1"><Users size={12} /> {profile.total_referrals} referrals</span>
+            <span className="flex items-center gap-1"><IndianRupee size={12} /> {rupee(profile.total_earnings || 0)} earned</span>
+          </div>
+        )}
+      </NavLink>
+
+      {/* Help & Support */}
+      <NavLink to="/help" className="card flex w-full items-center justify-between text-left">
+        <span className="flex items-center gap-2 font-bold text-brand-600"><HelpCircle size={18} /> Help & Support</span>
         <span className="text-slate-400">→</span>
       </NavLink>
 

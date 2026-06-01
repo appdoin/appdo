@@ -14,6 +14,7 @@ import Wallet from './pages/user/Wallet'
 import Profile from './pages/user/Profile'
 import Notifications from './pages/user/Notifications'
 import Referral from './pages/user/Referral'
+import HelpSupport from './pages/user/HelpSupport'
 
 function Splash() {
   return (
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/referral" element={<Referral />} />
+        <Route path="/help" element={<HelpSupport />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

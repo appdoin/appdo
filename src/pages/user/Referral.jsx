@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Copy, CheckCircle2, Users, IndianRupee, Gift, Share2, ArrowLeft } from 'lucide-react'
+import { Copy, CheckCircle2, Users, IndianRupee, Gift, Share2, ArrowLeft, Clock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useDataCache } from '../../context/DataCacheContext'
@@ -111,17 +111,32 @@ export default function Referral() {
 
   return (
     <div className="space-y-3">
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl bg-gradient-to-br from-brand-500 to-violet-500 p-4 text-white shadow-lg shadow-brand-500/20">
-          <Users size={16} className="opacity-80 mb-1" />
-          <p className="text-2xl font-extrabold">{totalReferrals}</p>
-          <p className="text-[10px] opacity-80">Total Referrals</p>
+      {/* How it works banner */}
+      <div className="card relative overflow-hidden bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/20">
+        <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-white/10 blur-xl" />
+        <div className="relative">
+          <Gift size={20} className="mb-1 opacity-80" />
+          <p className="text-sm font-bold">Refer Friends & Earn ₹{bonusAmount} Each!</p>
+          <p className="text-[10px] text-white/80 mt-0.5">Share → Friend signs up → Friend reviews → You earn!</p>
         </div>
-        <div className="rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 p-4 text-white shadow-lg shadow-emerald-500/20">
-          <IndianRupee size={16} className="opacity-80 mb-1" />
-          <p className="text-2xl font-extrabold">{rupee(totalEarnings)}</p>
-          <p className="text-[10px] opacity-80">Referral Earnings</p>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-2xl bg-gradient-to-br from-brand-500 to-violet-500 p-3 text-white shadow-lg shadow-brand-500/20">
+          <Users size={14} className="opacity-80 mb-0.5" />
+          <p className="text-xl font-extrabold">{totalReferrals}</p>
+          <p className="text-[9px] opacity-80">Referrals</p>
+        </div>
+        <div className="rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 p-3 text-white shadow-lg shadow-emerald-500/20">
+          <IndianRupee size={14} className="opacity-80 mb-0.5" />
+          <p className="text-xl font-extrabold">{rupee(totalEarnings)}</p>
+          <p className="text-[9px] opacity-80">Earned</p>
+        </div>
+        <div className="rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 p-3 text-white shadow-lg shadow-amber-500/20">
+          <Clock size={14} className="opacity-80 mb-0.5" />
+          <p className="text-xl font-extrabold">{rewards.filter(r => r.status === 'pending').length}</p>
+          <p className="text-[9px] opacity-80">Pending</p>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ChevronRight, Flame, Check, Clock, Grid3x3 } from 'lucide-react'
+import { Search, ChevronRight, Flame, Check, Clock, Grid3x3, Gift } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
@@ -165,6 +165,21 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Referral mini-banner */}
+      <button
+        onClick={() => nav('/referral')}
+        className="flex w-full items-center gap-2.5 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-200 px-3 py-2.5 text-left transition active:scale-[0.98] dark:border-violet-500/20 dark:from-violet-500/5 dark:to-purple-500/5"
+      >
+        <div className="grid h-8 w-8 place-items-center rounded-lg bg-violet-500 text-white">
+          <Gift size={16} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-violet-700 dark:text-violet-300">Refer & Earn Money!</p>
+          <p className="text-[10px] text-slate-500 dark:text-slate-400">Share your code & earn on every friend's review</p>
+        </div>
+        <ChevronRight size={14} className="text-violet-400" />
+      </button>
 
       {/* Categories — horizontally scrollable strip (drag + wheel + touch) */}
       <div
