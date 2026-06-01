@@ -13,11 +13,19 @@ export default function Profile() {
   const [name, setName] = useState(profile?.full_name || '')
   const [upi, setUpi] = useState(profile?.upi_id || '')
   const [stats, setStats] = useState({ approved: 0, pending: 0, rejected: 0 })
+  const [referralBonus, setReferralBonus] = useState(10)
 
   useEffect(() => {
     setName(profile?.full_name || '')
     setUpi(profile?.upi_id || '')
   }, [profile])
+
+  useEffect(() => {
+    supabase.from('settings').select('value').eq('key', 'referral_bonus').maybeSingle().then(({ data }) => {
+      const n = Number(String(data?.value ?? '').replace(/[^\d.]/g, ''))
+      if (Number.isFinite(n) && n > 0) setReferralBonus(n)
+    })
+  }, [])
 
   useEffect(() => {
     supabase.from('reviews').select('status').then(({ data }) => {
@@ -63,26 +71,33 @@ export default function Profile() {
       )}
 
       {/* Refer & Earn - Prominent Card */}
-      <NavLink to="/referral" className="card relative overflow-hidden bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/20">
-        <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-white/10 blur-xl" />
-        <div className="relative flex items-center justify-between">
+      <NavLink
+        to="/referral"
+        className="relative block overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 p-4 text-white shadow-lg shadow-violet-500/30"
+      >
+        <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15 blur-2xl" />
+        <div className="relative flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/20">
-              <Gift size={20} />
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/20">
+              <Gift size={22} />
             </div>
             <div>
-              <p className="font-bold">Refer & Earn ₹{profile?.referral_bonus || 10}</p>
-              <p className="text-xs text-white/80">Share code & earn on every referral!</p>
+              <p className="text-base font-bold leading-tight">Refer &amp; Earn ₹{referralBonus}</p>
+              <p className="text-xs text-white/85">Share your code & earn on every referral!</p>
             </div>
           </div>
-          <span className="text-white/80">→</span>
+          <span className="text-lg text-white/90">→</span>
         </div>
-        {(profile?.total_referrals > 0) && (
-          <div className="relative mt-2 flex gap-3 border-t border-white/20 pt-2 text-xs">
-            <span className="flex items-center gap-1"><Users size={12} /> {profile.total_referrals} referrals</span>
-            <span className="flex items-center gap-1"><IndianRupee size={12} /> {rupee(profile.total_earnings || 0)} earned</span>
+        <div className="relative mt-3 grid grid-cols-2 gap-2">
+          <div className="rounded-xl bg-white/15 px-3 py-2">
+            <p className="flex items-center gap-1 text-[11px] text-white/80"><Users size={12} /> Referrals</p>
+            <p className="text-lg font-extrabold leading-none">{profile?.total_referrals || 0}</p>
           </div>
-        )}
+          <div className="rounded-xl bg-white/15 px-3 py-2">
+            <p className="flex items-center gap-1 text-[11px] text-white/80"><IndianRupee size={12} /> Earned</p>
+            <p className="text-lg font-extrabold leading-none">{rupee(profile?.total_earnings || 0)}</p>
+          </div>
+        </div>
       </NavLink>
 
       {/* Help & Support */}

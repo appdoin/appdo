@@ -136,6 +136,7 @@ export default function AppDetail() {
         p_screenshot_url: pub.publicUrl,
         p_device_fingerprint: fingerprint,
         p_time_spent_seconds: timeSpent,
+        p_opened_store: opened,
       })
       if (error) throw error
       toast.success('Proof submitted! Reward credited after approval.')

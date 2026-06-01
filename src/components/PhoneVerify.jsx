@@ -3,7 +3,7 @@ import { ShieldCheck, MessageCircle, Send, AlertTriangle, Clock, Eye, EyeOff, Fi
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from './Toast'
-import { niceError } from '../lib/format'
+import { niceError, getDeviceId } from '../lib/format'
 import { generateFingerprint } from '../lib/fingerprint'
 
 // In-App OTP Verification Flow:
@@ -45,12 +45,13 @@ export default function PhoneVerify() {
     setBusy(true)
     setStep('checking')
     try {
-      // Get device fingerprint for fraud check
-      const deviceId = await generateFingerprint()
+      // Combine a stable device id with a browser fingerprint for fraud checks
+      const fingerprint = await generateFingerprint()
 
       const { data, error: rpcErr } = await supabase.rpc('request_phone_otp_v2', {
         p_phone: cleanPhone,
-        p_device_id: deviceId,
+        p_device_id: getDeviceId(),
+        p_fingerprint: fingerprint,
       })
 
       if (rpcErr) {

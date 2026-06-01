@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { HelpCircle, ChevronDown, ChevronUp, Mail, Send, MessageCircle, Search, ArrowLeft } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
 
-const FAQ_DATA = [
+const buildFAQ = ({ minWithdrawal, referralBonus }) => [
   {
     category: 'Wallet & Payments',
     questions: [
@@ -17,7 +18,7 @@ const FAQ_DATA = [
       },
       {
         q: 'Minimum withdrawal kitna hai?',
-        a: 'Minimum withdrawal amount ₹10 hai. Jab tak aapke wallet me ₹10 nahi hote, tab tak aap withdrawal request nahi bhej sakte.',
+        a: `Minimum withdrawal amount ₹${minWithdrawal} hai. Jab tak aapke wallet me ₹${minWithdrawal} nahi hote, tab tak aap withdrawal request nahi bhej sakte.`,
         keywords: ['minimum', 'withdrawal', 'kitna', 'limit', 'kam'],
       },
       {
@@ -97,7 +98,7 @@ const FAQ_DATA = [
       },
       {
         q: 'Referral bonus kab milta hai?',
-        a: 'Referral bonus tab milta hai jab aapke dwara referred user ka pehla review approve ho jata hai. Tab aapke wallet me automatically bonus credit ho jata hai.',
+        a: `Referral bonus tab milta hai jab aapke dwara referred user ka pehla review approve ho jata hai. Tab ₹${referralBonus} aapke wallet me automatically credit ho jata hai.`,
         keywords: ['referral', 'bonus', 'kab', 'credit', 'when'],
       },
       {
@@ -112,6 +113,25 @@ const FAQ_DATA = [
 export default function HelpSupport() {
   const [search, setSearch] = useState('')
   const [openIdx, setOpenIdx] = useState(null)
+  const [settings, setSettings] = useState({ minWithdrawal: 10, referralBonus: 10 })
+
+  // Load admin-controlled amounts so FAQ answers stay in sync.
+  useEffect(() => {
+    supabase.from('settings').select('key, value').in('key', ['min_withdrawal', 'referral_bonus']).then(({ data }) => {
+      if (!data) return
+      const map = Object.fromEntries(data.map((r) => [r.key, r.value]))
+      const parse = (v, fb) => {
+        const n = Number(String(v ?? '').replace(/[^\d.]/g, ''))
+        return Number.isFinite(n) && n > 0 ? n : fb
+      }
+      setSettings({
+        minWithdrawal: parse(map.min_withdrawal, 10),
+        referralBonus: parse(map.referral_bonus, 10),
+      })
+    })
+  }, [])
+
+  const FAQ_DATA = buildFAQ(settings)
 
   const allQuestions = FAQ_DATA.flatMap((cat) =>
     cat.questions.map((q) => ({ ...q, category: cat.category }))

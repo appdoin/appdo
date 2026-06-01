@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Star, Mail, Lock, User as UserIcon } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Star, Mail, Lock, User as UserIcon, Gift } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
 import { niceError } from '../../lib/format'
@@ -10,17 +10,36 @@ export default function AuthPage({ mode }) {
   const { signIn, signUp, signInWithGoogle } = useAuth()
   const toast = useToast()
   const nav = useNavigate()
-  const [form, setForm] = useState({ fullName: '', email: '', password: '' })
+  const [params] = useSearchParams()
+  const [form, setForm] = useState({ fullName: '', email: '', password: '', referralCode: '' })
+  const [refLocked, setRefLocked] = useState(false)
   const [busy, setBusy] = useState(false)
+
+  // Auto-fill referral code from the invite link (?ref=CODE) or a stored one.
+  useEffect(() => {
+    const fromUrl = (params.get('ref') || '').trim().toUpperCase()
+    const stored = (localStorage.getItem('ref_code') || '').trim().toUpperCase()
+    const code = fromUrl || stored
+    if (code) {
+      localStorage.setItem('ref_code', code)
+      setForm((f) => ({ ...f, referralCode: code }))
+      if (fromUrl) setRefLocked(true)
+    }
+  }, [params])
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
   const submit = async (e) => {
     e.preventDefault()
+    if (isSignup && !form.referralCode.trim()) {
+      return toast.error('Referral code is required to create an account.')
+    }
     setBusy(true)
     try {
       if (isSignup) {
-        await signUp(form)
+        const code = form.referralCode.trim().toUpperCase()
+        localStorage.setItem('ref_code', code)
+        await signUp({ ...form, referralCode: code })
         toast.success('Account created! You can start earning.')
       } else {
         await signIn(form)
@@ -62,6 +81,25 @@ export default function AuthPage({ mode }) {
             <Lock size={18} className="absolute left-3 top-3.5 text-slate-400" />
             <input type="password" className="input pl-10" placeholder="Password" value={form.password} onChange={set('password')} required minLength={6} />
           </div>
+
+          {isSignup && (
+            <div>
+              <div className="relative">
+                <Gift size={18} className="absolute left-3 top-3.5 text-slate-400" />
+                <input
+                  className="input pl-10 uppercase"
+                  placeholder="Referral code"
+                  value={form.referralCode}
+                  onChange={(e) => setForm((f) => ({ ...f, referralCode: e.target.value.toUpperCase() }))}
+                  readOnly={refLocked}
+                  required
+                />
+              </div>
+              <p className="mt-1 px-1 text-xs text-slate-400">
+                {refLocked ? 'Applied from your invite link.' : 'Ask a friend for their referral code.'}
+              </p>
+            </div>
+          )}
 
           <button disabled={busy} className="btn-primary w-full">
             {busy ? 'Please wait…' : isSignup ? 'Create account' : 'Sign in'}

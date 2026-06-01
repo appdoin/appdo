@@ -31,6 +31,22 @@ export function AuthProvider({ children }) {
     }
     setProfile(data ?? null)
 
+    // If the user signed up via a referral link but isn't linked yet
+    // (e.g. Google OAuth couldn't carry metadata), apply it now.
+    try {
+      const refCode = (localStorage.getItem('ref_code') || '').trim().toUpperCase()
+      if (refCode && data && !data.referred_by) {
+        const { error } = await supabase.rpc('apply_referral', { p_referral_code: refCode })
+        if (!error) {
+          localStorage.removeItem('ref_code')
+          const res = await supabase.from('profiles').select('*').eq('id', userId).single()
+          if (res.data) setProfile(res.data)
+        }
+      } else if (data?.referred_by) {
+        localStorage.removeItem('ref_code')
+      }
+    } catch { /* non-blocking */ }
+
     // Register device fingerprint silently for fraud detection
     try {
       const fp = await generateFingerprint()
@@ -65,11 +81,17 @@ export function AuthProvider({ children }) {
     [session, loadProfile],
   )
 
-  const signUp = async ({ email, password, fullName }) => {
+  const signUp = async ({ email, password, fullName, referralCode }) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName, device_id: getDeviceId() } },
+      options: {
+        data: {
+          full_name: fullName,
+          device_id: getDeviceId(),
+          referred_code: (referralCode || '').trim().toUpperCase() || null,
+        },
+      },
     })
     if (error) throw error
     return data

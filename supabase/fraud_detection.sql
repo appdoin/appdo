@@ -12,7 +12,7 @@ create table if not exists public.device_fingerprints (
   fingerprint    text not null,
   user_agent     text,
   screen_res     text,
-  timezone       `p text,
+  timezone       text,
   ip_address     text,
   first_seen_at  timestamptz not null default now(),
   last_seen_at   timestamptz not null default now()
