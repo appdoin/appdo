@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CreditCard, Phone, Pencil, Check, ArrowDownToLine } from 'lucide-react'
+import { CreditCard, Phone, Pencil, Check, ArrowDownToLine, Landmark, Smartphone } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
@@ -16,9 +16,25 @@ export default function Wallet() {
   const [busy, setBusy] = useState(false)
   const [min, setMin] = useState(10)
 
+  // Payment method + bank details
+  const [method, setMethod] = useState(profile?.payout_method || 'upi')
+  const [bank, setBank] = useState({
+    account_holder_name: profile?.account_holder_name || '',
+    bank_account_number: profile?.bank_account_number || '',
+    bank_ifsc: profile?.bank_ifsc || '',
+  })
+  const [editBank, setEditBank] = useState(false)
+  const [savingMethod, setSavingMethod] = useState(false)
+
   useEffect(() => {
     setUpi(profile?.upi_id || '')
-  }, [profile?.upi_id])
+    setMethod(profile?.payout_method || 'upi')
+    setBank({
+      account_holder_name: profile?.account_holder_name || '',
+      bank_account_number: profile?.bank_account_number || '',
+      bank_ifsc: profile?.bank_ifsc || '',
+    })
+  }, [profile?.upi_id, profile?.payout_method, profile?.account_holder_name, profile?.bank_account_number, profile?.bank_ifsc])
 
   useEffect(() => {
     supabase.from('withdrawals').select('*').order('created_at', { ascending: false }).then(({ data }) => setHistory(data ?? []))
@@ -32,10 +48,38 @@ export default function Wallet() {
     toast.success('UPI ID updated.')
   }
 
+  const chooseMethod = async (m) => {
+    setMethod(m)
+    setSavingMethod(true)
+    try {
+      await supabase.from('profiles').update({ payout_method: m }).eq('id', profile.id)
+      refreshProfile()
+    } catch (e) { toast.error(niceError(e)) } finally { setSavingMethod(false) }
+  }
+
+  const saveBank = async () => {
+    if (!bank.account_holder_name || !bank.bank_account_number || !bank.bank_ifsc) {
+      return toast.error('Fill all bank fields.')
+    }
+    setSavingMethod(true)
+    try {
+      const { error } = await supabase.from('profiles').update({
+        account_holder_name: bank.account_holder_name.trim(),
+        bank_account_number: bank.bank_account_number.trim(),
+        bank_ifsc: bank.bank_ifsc.trim().toUpperCase(),
+        payout_method: 'bank',
+      }).eq('id', profile.id)
+      if (error) throw error
+      setEditBank(false)
+      refreshProfile()
+      toast.success('Bank details saved.')
+    } catch (e) { toast.error(niceError(e)) } finally { setSavingMethod(false) }
+  }
+
   const withdraw = async () => {
     setBusy(true)
     try {
-      const { error } = await supabase.rpc('request_withdrawal', { p_amount: Number(amount), p_upi: upi || null })
+      const { error } = await supabase.rpc('request_withdrawal', { p_amount: Number(amount), p_upi: method === 'upi' ? (upi || null) : null })
       if (error) throw error
       toast.success('Withdrawal requested!')
       setAmount('')
@@ -50,48 +94,91 @@ export default function Wallet() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-stagger">
       {/* Balance */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-brand-500 to-brand-700 p-4 text-white shadow-md animate-slide-up">
-        <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-white/10 blur-xl animate-pulse-soft" />
-        <div className="absolute -bottom-6 left-8 h-12 w-12 rounded-full bg-white/5 blur-xl" />
-        <div className="decor-leaf leaf-1" style={{ opacity: 0.2 }} />
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-500 via-brand-600 to-indigo-700 p-5 text-white shadow-lg animate-slide-up">
+        <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10 blur-xl animate-pulse-soft" />
+        <div className="absolute -bottom-8 left-8 h-16 w-16 rounded-full bg-white/5 blur-xl" />
+        <div className="decor-leaf leaf-1" style={{ opacity: 0.25 }} />
+        <div className="decor-leaf leaf-2" style={{ opacity: 0.2 }} />
+        <div className="decor-leaf leaf-3" style={{ opacity: 0.2 }} />
         <p className="relative flex items-center gap-1.5 text-xs text-white/80"><CreditCard size={13} /> Available Balance</p>
-        <p className="relative mt-1 text-2xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
+        <p className="relative mt-1 text-3xl font-extrabold tracking-tight">{rupee(profile?.wallet_balance)}</p>
+        <p className="relative mt-1 text-[11px] text-white/70">Total earned {rupee(profile?.total_earned)}</p>
       </div>
 
       {/* WhatsApp verification */}
       <PhoneVerify />
 
-      {/* UPI ID */}
-      <div className="card">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="flex items-center gap-2 font-bold"><CreditCard size={16} /> UPI ID</h3>
-          {!editUpi ? (
-            <button onClick={() => setEditUpi(true)} className="flex items-center gap-1 text-sm font-semibold text-brand-600"><Pencil size={14} /> Edit</button>
-          ) : (
-            <button onClick={saveUpi} className="flex items-center gap-1 text-sm font-semibold text-emerald-600"><Check size={14} /> Save</button>
-          )}
+      {/* Payment method selector */}
+      <div className="card relative overflow-hidden">
+        <div className="decor-sparkle" />
+        <h3 className="mb-2 flex items-center gap-2 font-bold"><CreditCard size={16} /> Payment Method</h3>
+        <div className="mb-3 grid grid-cols-2 gap-2">
+          <button onClick={() => chooseMethod('upi')} disabled={savingMethod} className={`btn py-2.5 text-sm ${method === 'upi' ? 'bg-brand-500 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+            <Smartphone size={15} /> UPI
+          </button>
+          <button onClick={() => chooseMethod('bank')} disabled={savingMethod} className={`btn py-2.5 text-sm ${method === 'bank' ? 'bg-brand-500 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+            <Landmark size={15} /> Bank Account
+          </button>
         </div>
-        {editUpi ? (
-          <input className="input" value={upi} onChange={(e) => setUpi(e.target.value)} placeholder="yourname@bank" />
+
+        {method === 'upi' ? (
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-500">UPI ID</span>
+              {!editUpi ? (
+                <button onClick={() => setEditUpi(true)} className="flex items-center gap-1 text-sm font-semibold text-brand-600"><Pencil size={14} /> Edit</button>
+              ) : (
+                <button onClick={saveUpi} className="flex items-center gap-1 text-sm font-semibold text-emerald-600"><Check size={14} /> Save</button>
+              )}
+            </div>
+            {editUpi ? (
+              <input className="input" value={upi} onChange={(e) => setUpi(e.target.value)} placeholder="yourname@bank" />
+            ) : (
+              <div className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3 text-sm font-semibold text-emerald-600 dark:bg-emerald-500/10">
+                <Check size={16} /> {profile?.upi_id || 'Not set'}
+              </div>
+            )}
+          </div>
         ) : (
-          <div className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3 text-sm font-semibold text-emerald-600 dark:bg-emerald-500/10">
-            <Check size={16} /> {profile?.upi_id || 'Not set'}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-500">Bank Account</span>
+              {!editBank ? (
+                <button onClick={() => setEditBank(true)} className="flex items-center gap-1 text-sm font-semibold text-brand-600"><Pencil size={14} /> Edit</button>
+              ) : (
+                <button onClick={saveBank} disabled={savingMethod} className="flex items-center gap-1 text-sm font-semibold text-emerald-600"><Check size={14} /> Save</button>
+              )}
+            </div>
+            {editBank ? (
+              <div className="space-y-2">
+                <input className="input" value={bank.account_holder_name} onChange={(e) => setBank((b) => ({ ...b, account_holder_name: e.target.value }))} placeholder="Account holder name" />
+                <input className="input" value={bank.bank_account_number} onChange={(e) => setBank((b) => ({ ...b, bank_account_number: e.target.value.replace(/\D/g, '') }))} placeholder="Account number" inputMode="numeric" />
+                <input className="input uppercase" value={bank.bank_ifsc} onChange={(e) => setBank((b) => ({ ...b, bank_ifsc: e.target.value.toUpperCase() }))} placeholder="IFSC code" />
+              </div>
+            ) : profile?.bank_account_number ? (
+              <div className="rounded-xl bg-emerald-50 p-3 text-sm font-semibold text-emerald-600 dark:bg-emerald-500/10">
+                <p className="flex items-center gap-2"><Check size={16} /> {profile.account_holder_name}</p>
+                <p className="mt-1 font-mono text-xs">****{profile.bank_account_number.slice(-4)} · {profile.bank_ifsc}</p>
+              </div>
+            ) : (
+              <div className="rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-600 dark:bg-amber-500/10">Add your bank account to receive payouts.</div>
+            )}
           </div>
         )}
       </div>
 
       {/* Status */}
       <div className="card space-y-2">
-        <h3 className="flex items-center gap-2 font-bold"><Phone size={16} /> Phone & UPI Status</h3>
+        <h3 className="flex items-center gap-2 font-bold"><Phone size={16} /> Verification Status</h3>
         <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm dark:bg-slate-800/50">
           <span>Phone: {profile?.phone ? '+91 ' + profile.phone : '—'}</span>
           <span className={profile?.phone_verified ? 'font-semibold text-emerald-500' : 'text-rose-500'}>{profile?.phone_verified ? '✓ Verified' : 'Not verified'}</span>
         </div>
         <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 text-sm dark:bg-slate-800/50">
-          <span>UPI: {profile?.upi_id || '—'}</span>
-          <span className={profile?.upi_id ? 'font-semibold text-emerald-500' : 'text-rose-500'}>{profile?.upi_id ? '✓ Set' : 'Not set'}</span>
+          <span>{method === 'bank' ? 'Bank' : 'UPI'}: {method === 'bank' ? (profile?.bank_account_number ? '****' + profile.bank_account_number.slice(-4) : '—') : (profile?.upi_id || '—')}</span>
+          <span className={(method === 'bank' ? profile?.bank_account_number : profile?.upi_id) ? 'font-semibold text-emerald-500' : 'text-rose-500'}>{(method === 'bank' ? profile?.bank_account_number : profile?.upi_id) ? '✓ Set' : 'Not set'}</span>
         </div>
       </div>
 

@@ -201,3 +201,75 @@ body {
   0% { opacity: 0; transform: translateY(8px); }
   100% { opacity: 1; transform: translateY(0); }
 }
+
+/* ===== FLORAL / VINE DECORATIONS (app-wide, subtle, GPU-friendly) ===== */
+/* Two corner vines + scattered petals rendered as a single fixed layer.   */
+.floral-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.floral-bg::before,
+.floral-bg::after {
+  content: '';
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.5;
+}
+/* Top-right vine with flowers */
+.floral-bg::before {
+  top: -18px;
+  right: -18px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' opacity='0.35'%3E%3Cpath d='M200 0 C150 30 170 70 130 90 C95 108 110 150 70 165'/%3E%3Cpath d='M170 40 C150 45 140 35 150 20' stroke='%2310b981'/%3E%3Cpath d='M132 88 C112 92 104 80 116 66' stroke='%2310b981'/%3E%3Cpath d='M92 130 C72 134 64 122 76 108' stroke='%2310b981'/%3E%3C/g%3E%3Cg%3E%3Ccircle cx='185' cy='20' r='5' fill='%23f472b6'/%3E%3Ccircle cx='180' cy='12' r='4' fill='%23fbbf24'/%3E%3Ccircle cx='192' cy='14' r='4' fill='%23fbbf24'/%3E%3Ccircle cx='130' cy='92' r='6' fill='%23f472b6'/%3E%3Ccircle cx='123' cy='84' r='4' fill='%23a78bfa'/%3E%3Ccircle cx='137' cy='84' r='4' fill='%23a78bfa'/%3E%3Ccircle cx='70' cy='166' r='5' fill='%23f472b6'/%3E%3C/g%3E%3C/svg%3E");
+  animation: floral-sway 9s ease-in-out infinite;
+}
+/* Bottom-left vine with flowers */
+.floral-bg::after {
+  bottom: 56px;
+  left: -22px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' opacity='0.35'%3E%3Cpath d='M0 200 C50 170 30 130 70 110 C105 92 90 50 130 35'/%3E%3Cpath d='M40 158 C60 154 70 164 58 178' stroke='%2310b981'/%3E%3Cpath d='M76 108 C96 104 104 116 92 130' stroke='%2310b981'/%3E%3Cpath d='M112 64 C132 60 140 72 128 86' stroke='%2310b981'/%3E%3C/g%3E%3Cg%3E%3Ccircle cx='20' cy='185' r='5' fill='%23f472b6'/%3E%3Ccircle cx='13' cy='178' r='4' fill='%23fbbf24'/%3E%3Ccircle cx='27' cy='178' r='4' fill='%23fbbf24'/%3E%3Ccircle cx='70' cy='112' r='6' fill='%23f472b6'/%3E%3Ccircle cx='63' cy='104' r='4' fill='%23a78bfa'/%3E%3Ccircle cx='77' cy='104' r='4' fill='%23a78bfa'/%3E%3Ccircle cx='130' cy='36' r='5' fill='%23f472b6'/%3E%3C/g%3E%3C/svg%3E");
+  animation: floral-sway 11s ease-in-out infinite reverse;
+}
+/* Soften the floral layer in dark mode so it doesn't fight the stars */
+.dark .floral-bg::before,
+.dark .floral-bg::after { opacity: 0.18; }
+
+@keyframes floral-sway {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50% { transform: rotate(2deg) translateY(-5px); }
+}
+
+/* Falling petals — a few gentle, looping accents */
+.petal {
+  position: fixed;
+  top: -24px;
+  z-index: 0;
+  pointer-events: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 0 60% 60% 60%;
+  opacity: 0;
+  animation: petal-fall linear infinite;
+}
+.petal.p1 { left: 12%; background: #f9a8d4; animation-duration: 14s; animation-delay: 0s; }
+.petal.p2 { left: 38%; background: #c4b5fd; animation-duration: 18s; animation-delay: 4s; width: 9px; height: 9px; }
+.petal.p3 { left: 64%; background: #fcd34d; animation-duration: 16s; animation-delay: 8s; }
+.petal.p4 { left: 86%; background: #a7f3d0; animation-duration: 20s; animation-delay: 2s; width: 10px; height: 10px; }
+@keyframes petal-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.55; }
+  90% { opacity: 0.4; }
+  100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .floral-bg::before, .floral-bg::after, .petal { animation: none; }
+  .petal { display: none; }
+}
+

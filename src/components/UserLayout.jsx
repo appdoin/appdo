@@ -43,7 +43,14 @@ export default function UserLayout() {
       {/* Starry dark mode background */}
       <div className="stars-bg" />
       <div className="shooting-star" />
-      
+
+      {/* Floral / vine decorations (light + dark) */}
+      <div className="floral-bg" />
+      <span className="petal p1" />
+      <span className="petal p2" />
+      <span className="petal p3" />
+      <span className="petal p4" />
+
       {/* Header */}
       <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-slate-200/70 bg-white/90 px-3 py-2 backdrop-blur dark:border-slate-800/50 dark:bg-[#0d1225]/90">
         <div className="flex items-center gap-2">

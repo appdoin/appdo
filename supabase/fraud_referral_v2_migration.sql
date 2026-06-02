@@ -67,6 +67,11 @@ end;
 $$;
 
 -- =============================================================
+--  2b. Ensure referral_rewards has credited_at column
+-- =============================================================
+alter table public.referral_rewards add column if not exists credited_at timestamptz;
+
+-- =============================================================
 --  3. CREDIT REFERRAL ON FIRST APPROVED REVIEW
 --     approve_review now also credits any pending referral bonus.
 -- =============================================================
