@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Target, Award, Trophy, TrendingUp } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
 import { rupee, niceError } from '../../lib/format'
+import { startSpinTicking, playWinJingle } from '../../hooks/useClickSound'
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6', '#f97316']
 
@@ -36,6 +37,7 @@ export default function Rewards() {
   const [avgReward, setAvgReward] = useState(10)
   const [board, setBoard] = useState([])
   const [period, setPeriod] = useState('week')
+  const stopTickRef = useRef(null)
 
   useEffect(() => {
     ;(async () => {
@@ -96,7 +98,14 @@ export default function Rewards() {
       const seg = 360 / n
       const target = 360 * 6 + (360 - (data.index * seg + seg / 2))
       setRotation(target)
+
+      // Start ticking sound that decelerates with the wheel
+      if (stopTickRef.current) stopTickRef.current()
+      stopTickRef.current = startSpinTicking(4000)
+
       setTimeout(() => {
+        if (stopTickRef.current) { stopTickRef.current(); stopTickRef.current = null }
+        playWinJingle()
         setWon(data.amount)
         setSpunToday(true)
         setSpinning(false)
@@ -105,6 +114,7 @@ export default function Rewards() {
       }, 4200)
     } catch (err) {
       setSpinning(false)
+      if (stopTickRef.current) { stopTickRef.current(); stopTickRef.current = null }
       toast.error(niceError(err))
     }
   }

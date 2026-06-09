@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ExternalLink, Timer, ImagePlus, ArrowLeft, CheckCircle2, Clock, ImageIcon, Camera } from 'lucide-react'
+import { ExternalLink, Timer, ImagePlus, ArrowLeft, CheckCircle2, Clock, ImageIcon, Camera, MessageSquare } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
@@ -246,6 +246,19 @@ export default function AppDetail() {
           ))}
         </ol>
       </div>
+
+      {/* Admin Comment (if any) */}
+      {app.admin_comment && (
+        <div className="card border-l-4 border-l-violet-400">
+          <div className="flex items-start gap-2">
+            <MessageSquare size={16} className="mt-0.5 shrink-0 text-violet-500" />
+            <div>
+              <p className="text-xs font-bold text-violet-600 dark:text-violet-400">Note from Admin</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{app.admin_comment}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Review text + screenshot */}
       <div className="card space-y-3 animate-slide-up">

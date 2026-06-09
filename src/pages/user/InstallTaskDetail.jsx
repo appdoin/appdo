@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ExternalLink, Timer, ArrowLeft, CheckCircle2, ImageIcon, Camera, ImagePlus, Download } from 'lucide-react'
+import { ExternalLink, ArrowLeft, CheckCircle2, ImageIcon, Camera, ImagePlus, Download, MessageSquare } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
@@ -16,11 +16,9 @@ export default function InstallTaskDetail() {
   const cameraRef = useRef(null)
 
   const [app, setApp] = useState(null)
-  const [opened, setOpened] = useState(false)
-  const [seconds, setSeconds] = useState(0)
   const [busy, setBusy] = useState(false)
 
-  // Single screenshot (inside app)
+  // Single screenshot (Play Store)
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
 
@@ -35,20 +33,7 @@ export default function InstallTaskDetail() {
     })
   }, [id])
 
-  // countdown timer after opening play store
-  useEffect(() => {
-    if (!opened || !app) return
-    if (seconds >= app.wait_seconds) return
-    const t = setTimeout(() => setSeconds((s) => s + 1), 1000)
-    return () => clearTimeout(t)
-  }, [opened, seconds, app])
-
-  const ready = opened && app && seconds >= app.wait_seconds
-  const remaining = app ? Math.max(0, app.wait_seconds - seconds) : 0
-
   const openStore = () => {
-    setOpened(true)
-    setSeconds(0)
     if (app?.play_store_url) window.open(app.play_store_url, '_blank', 'noopener')
   }
 
@@ -68,7 +53,7 @@ export default function InstallTaskDetail() {
   }
 
   const submit = async () => {
-    if (!file) return toast.error('Please upload screenshot of the app.')
+    if (!file) return toast.error('Please upload a Play Store screenshot.')
     setBusy(true)
     try {
       // Upload screenshot
@@ -79,7 +64,7 @@ export default function InstallTaskDetail() {
       const { data: pub } = supabase.storage.from('proofs').getPublicUrl(path)
       const screenshotUrl = pub.publicUrl
 
-      // Submit — pass same URL for both fields (outside is not needed)
+      // Submit — pass same URL for both fields
       const { error } = await supabase.rpc('submit_install_task', {
         p_app_id: id,
         p_screenshot_inside: screenshotUrl,
@@ -131,9 +116,9 @@ export default function InstallTaskDetail() {
           <p className="text-center font-bold text-cyan-600">HOW TO COMPLETE THIS TASK</p>
           {[
             'Click the "Download from Play Store" button above',
-            'Install and open the app',
-            `Use the app for at least ${app.wait_seconds} seconds`,
-            'Take a full screenshot inside the app (do not crop)',
+            'Install the app from Play Store',
+            'Take a screenshot of the Play Store page showing the app is installed',
+            'Upload the screenshot below and submit',
             `Done! ${rupee(app.reward_amount)} will be added to your wallet after verification`,
           ].map((s, i) => (
             <li key={i} className="flex gap-2">
@@ -144,29 +129,20 @@ export default function InstallTaskDetail() {
         </ol>
       </div>
 
-      {/* Timer / status */}
-      <div className="card">
-        <h3 className="mb-2 font-bold text-cyan-600">📲 Submit Install Proof</h3>
-        {!opened ? (
-          <div className="rounded-xl bg-cyan-50 p-3 text-center text-sm text-cyan-600 dark:bg-cyan-500/10">
-            <Timer size={16} className="mx-auto mb-1" />
-            Click "Download from Play Store" button above first
-            <p className="text-xs text-cyan-400">You'll need to wait {app.wait_seconds} seconds after installing the app</p>
+      {/* Admin Comment (if any) */}
+      {app.admin_comment && (
+        <div className="card border-l-4 border-l-violet-400">
+          <div className="flex items-start gap-2">
+            <MessageSquare size={16} className="mt-0.5 shrink-0 text-violet-500" />
+            <div>
+              <p className="text-xs font-bold text-violet-600 dark:text-violet-400">Note from Admin</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{app.admin_comment}</p>
+            </div>
           </div>
-        ) : ready ? (
-          <div className="rounded-xl bg-emerald-50 p-3 text-center text-sm font-semibold text-emerald-600 dark:bg-emerald-500/10">
-            <CheckCircle2 size={16} className="mx-auto mb-1" /> You can now submit your screenshot!
-          </div>
-        ) : (
-          <div className="rounded-xl bg-amber-50 p-3 text-center dark:bg-amber-500/10">
-            <Timer size={22} className="mx-auto mb-1 text-amber-500" />
-            <p className="text-lg font-bold text-amber-600">{remaining}s</p>
-            <p className="text-xs text-amber-500">Use the app while waiting. Upload screenshot when timer ends.</p>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Admin instructions (if any) */}
+      {/* Admin Instructions (if any) */}
       {app.review_template && (
         <div className="card">
           <h3 className="mb-2 text-sm font-bold text-cyan-600">📋 Admin Instructions</h3>
@@ -174,10 +150,10 @@ export default function InstallTaskDetail() {
         </div>
       )}
 
-      {/* Single Screenshot Upload */}
+      {/* Single Screenshot Upload — Play Store screenshot */}
       <div className="card space-y-3 animate-slide-up">
-        <h3 className="font-bold">📱 App Screenshot</h3>
-        <p className="text-xs text-slate-400">Upload a full screenshot from inside the app (do not crop)</p>
+        <h3 className="font-bold">📱 Play Store Screenshot</h3>
+        <p className="text-xs text-slate-400">Upload a screenshot from Play Store showing the app is installed (showing "Open" or "Uninstall" button)</p>
 
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={pickFile} />
         <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={pickFile} />
@@ -191,8 +167,8 @@ export default function InstallTaskDetail() {
           ) : (
             <>
               <ImagePlus size={30} className="mx-auto text-cyan-400" />
-              <p className="mt-1.5 text-sm font-semibold text-slate-500">Screenshot from inside the app</p>
-              <p className="text-[11px] text-slate-400">Full screenshot, do not crop</p>
+              <p className="mt-1.5 text-sm font-semibold text-slate-500">Play Store screenshot</p>
+              <p className="text-[11px] text-slate-400">Show the app page with "Open" or "Uninstall" visible</p>
               <div className="mt-3 flex items-center justify-center gap-2">
                 <button type="button" onClick={() => fileRef.current?.click()} className="btn-soft px-4 py-2 text-xs">
                   <ImageIcon size={14} /> Gallery
@@ -206,7 +182,7 @@ export default function InstallTaskDetail() {
           )}
         </div>
 
-        <button onClick={submit} disabled={!ready || busy || !file} className="w-full rounded-xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-cyan-500/30 transition hover:bg-cyan-600 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+        <button onClick={submit} disabled={busy || !file} className="w-full rounded-xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-cyan-500/30 transition hover:bg-cyan-600 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
           {busy ? 'Submitting…' : '📲 Submit Screenshot'}
         </button>
 

@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { Outlet, useLocation, NavLink } from 'react-router-dom'
 import { Home, Trophy, History, Wallet, User, Sun, Moon, Bell, HelpCircle, Gift } from 'lucide-react'
+import { playClick } from '../hooks/useClickSound'
 import { useAuth } from '../context/AuthContext'
 import { useNotifications } from '../context/NotificationsContext'
 import { useTheme } from '../hooks/useTheme'
@@ -30,6 +32,16 @@ export default function UserLayout() {
   const { dark, toggle } = useTheme()
   const { pathname } = useLocation()
   const title = TITLES[pathname] || (pathname.startsWith('/app/') ? '' : pathname.startsWith('/install-task/') ? '' : 'RewardReview')
+
+  // Global click sound on all buttons & interactive elements
+  useEffect(() => {
+    const handler = (e) => {
+      const el = e.target.closest('button, a, [role="button"]')
+      if (el) playClick()
+    }
+    document.addEventListener('pointerdown', handler, { passive: true })
+    return () => document.removeEventListener('pointerdown', handler)
+  }, [])
 
   const initials = (profile?.full_name || 'U')
     .split(' ')
