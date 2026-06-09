@@ -7,28 +7,28 @@ const buildFAQ = ({ minWithdrawal, referralBonus }) => [
     category: 'Wallet & Payments',
     questions: [
       {
-        q: 'Wallet se paise kab milenge?',
-        a: 'Jab aapka review admin dwara approve ho jata hai, to reward turant aapke wallet me credit ho jata hai. Withdrawal request karne ke baad 24-48 hours me aapke UPI ID par payment process hota hai.',
+        q: 'When will I receive my payment?',
+        a: `Once your review or install task is approved by admin, the reward is instantly added to your wallet. You can request a withdrawal when your balance reaches ₹${minWithdrawal} or more. Payments are processed within 24-48 hours to your UPI or bank account.`,
         keywords: ['paise', 'kab', 'milenge', 'wallet', 'money', 'when', 'payment'],
       },
       {
-        q: 'Mere paise mujhe kyun nahi mile abhi tak?',
-        a: 'Iske kuch reasons ho sakte hain:\n\n1. Aapka review abhi pending hai — admin ko approve karna hoga.\n2. Withdrawal request processing me hai (24-48 hours lagti hai).\n3. UPI ID galat hai — Profile me check karein.\n4. Phone number verify nahi hai — Wallet page pe verify karein.\n5. Minimum withdrawal amount complete nahi hua.',
+        q: 'Why haven\'t I received my payment yet?',
+        a: 'There could be several reasons:\n\n1. Your review is still pending — admin needs to approve it.\n2. Your withdrawal request is being processed (takes 24-48 hours).\n3. Your UPI ID is incorrect — check in your Profile.\n4. Your phone number is not verified — verify on the Wallet page.\n5. You haven\'t reached the minimum withdrawal amount.',
         keywords: ['nahi', 'mile', 'paise', 'kyun', 'not', 'received', 'pending', 'stuck'],
       },
       {
-        q: 'Minimum withdrawal kitna hai?',
-        a: `Minimum withdrawal amount ₹${minWithdrawal} hai. Jab tak aapke wallet me ₹${minWithdrawal} nahi hote, tab tak aap withdrawal request nahi bhej sakte.`,
+        q: 'What is the minimum withdrawal amount?',
+        a: `The minimum withdrawal amount is ₹${minWithdrawal}. You cannot submit a withdrawal request until your wallet balance reaches ₹${minWithdrawal}.`,
         keywords: ['minimum', 'withdrawal', 'kitna', 'limit', 'kam'],
       },
       {
-        q: 'UPI ID kaise change karein?',
-        a: 'Wallet page par jaiye → UPI ID section me "Edit" button dabayein → Naya UPI ID enter karein → Save karein. Ya Profile page se bhi update kar sakte hain.',
+        q: 'How to change my UPI ID?',
+        a: 'Go to Wallet page → Click "Edit" in the UPI ID section → Enter your new UPI ID → Save. You can also update it from the Profile page.',
         keywords: ['upi', 'change', 'edit', 'update', 'bank'],
       },
       {
-        q: 'Withdrawal reject kyun hua?',
-        a: 'Withdrawal reject hone ke reasons:\n\n1. UPI ID invalid ya inactive hai.\n2. Account me suspicious activity detect hui.\n3. Phone number verified nahi hai.\n\nReject hone par amount wapas wallet me aa jata hai.',
+        q: 'Why was my withdrawal rejected?',
+        a: 'Possible reasons for withdrawal rejection:\n\n1. Your UPI ID is invalid or inactive.\n2. Suspicious activity detected on your account.\n3. Phone number is not verified.\n\nIf rejected, the amount is returned to your wallet.',
         keywords: ['reject', 'withdrawal', 'failed', 'wapas', 'refund'],
       },
     ],
@@ -37,29 +37,49 @@ const buildFAQ = ({ minWithdrawal, referralBonus }) => [
     category: 'Reviews & Earning',
     questions: [
       {
-        q: 'Review kaise karu?',
-        a: 'Home page par available apps dikhte hain. Kisi bhi app par tap karein → Play Store se download karein → App use karein → Review likhein → Screenshot upload karein → Submit. Admin approval ke baad paise mil jayenge.',
+        q: 'How do I submit a review?',
+        a: 'Go to the Home page and browse available apps. Tap any app → Download from Play Store → Use the app → Write a review → Upload screenshot → Submit. Reward will be added to your wallet after admin approval.',
         keywords: ['review', 'kaise', 'how', 'karu', 'earn', 'start'],
       },
       {
-        q: 'Review approve hone me kitna time lagta hai?',
-        a: 'Normally 1-24 hours me admin review check karta hai. Peak time me thoda zyada lag sakta hai. Patience rakhein!',
+        q: 'How long does review approval take?',
+        a: 'Usually, admin reviews submissions within 1-24 hours. It may take longer during peak times. Please be patient!',
         keywords: ['approve', 'time', 'kitna', 'hours', 'wait', 'pending'],
       },
       {
-        q: 'Review reject kyun hota hai?',
-        a: 'Common reasons:\n\n1. Screenshot clear nahi hai ya galat app ka hai.\n2. Review text bahut chota ya irrelevant hai.\n3. Same review copy-paste kiya hai.\n4. App properly use nahi kiya (time bahut kam).\n5. Duplicate ya fake review detect hua.',
+        q: 'Why was my review rejected?',
+        a: 'Common reasons:\n\n1. Screenshot is unclear or from the wrong app.\n2. Review text is too short or irrelevant.\n3. Same review was copy-pasted.\n4. App was not used properly (too little time).\n5. Duplicate or fake review detected.',
         keywords: ['reject', 'review', 'kyun', 'reason', 'hota'],
       },
       {
-        q: 'Ek app ko dobara review kar sakte hain?',
-        a: 'Normally ek user ek app ko sirf ek baar review kar sakta hai. Lekin agar admin ne aapko whitelist kiya hai to aap multiple baar review kar sakte hain.',
+        q: 'Can I review the same app again?',
+        a: 'Normally, each user can review an app only once. However, if the admin has whitelisted you, you can submit multiple reviews.',
         keywords: ['dobara', 'again', 'multiple', 'same', 'app', 'ek'],
       },
       {
-        q: 'Daily reward kya hai?',
-        a: 'Har din app kholein aur "Claim" button dabayein — free me paise milenge! 7 din continuous claim karne par streak bonus milta hai. Ek din miss karne par streak reset ho jata hai.',
+        q: 'What is the daily reward?',
+        a: 'Open the app daily and tap the "Claim" button to earn free rewards! Claiming for 7 consecutive days earns you a streak bonus. Missing a day resets your streak.',
         keywords: ['daily', 'reward', 'claim', 'streak', 'free'],
+      },
+    ],
+  },
+  {
+    category: 'Install Tasks',
+    questions: [
+      {
+        q: 'What is an install task?',
+        a: 'In an install task, you simply need to install and use the app, then submit a full screenshot from inside the app. No review writing is required. The reward will be added to your wallet after admin approval.',
+        keywords: ['install', 'task', 'kya', 'what', 'difference'],
+      },
+      {
+        q: 'What\'s the difference between install and review tasks?',
+        a: 'In a review task, you need to write a 5-star review on Play Store and submit a screenshot of it. In an install task, you just download and use the app, then submit a screenshot from inside the app — no review writing needed.',
+        keywords: ['fark', 'difference', 'review', 'install', 'compare'],
+      },
+      {
+        q: 'How to take a screenshot for install tasks?',
+        a: 'After installing the app, open it and navigate to any screen. Take a full screenshot (do not crop it) and submit it.',
+        keywords: ['screenshot', 'install', 'kaise', 'how', 'crop'],
       },
     ],
   },
@@ -67,23 +87,23 @@ const buildFAQ = ({ minWithdrawal, referralBonus }) => [
     category: 'Account & Security',
     questions: [
       {
-        q: 'Phone number kaise verify karein?',
-        a: 'Wallet page par "WhatsApp Verification" section me apna 10-digit number enter karein → Request submit karein → Verification code app me dikhega (fraud check ke baad) → Code enter karein → Done!',
+        q: 'How to verify my phone number?',
+        a: 'Go to the Wallet page → Enter your 10-digit number in the "WhatsApp Verification" section → Submit → A verification code will appear in the app (after fraud check) → Enter the code → Done!',
         keywords: ['phone', 'verify', 'number', 'whatsapp', 'otp'],
       },
       {
-        q: 'Account ban kyun hua?',
-        a: 'Account ban hone ke reasons:\n\n1. Fake reviews submit kiye.\n2. Multiple accounts banayi same device se.\n3. Fraud activity detect hui.\n4. Spam ya abusive behavior.\n\nAgar aapko lagta hai galti se ban hua hai to support me contact karein.',
+        q: 'Why was my account banned?',
+        a: 'Reasons for account bans:\n\n1. Submitting fake reviews.\n2. Creating multiple accounts from the same device.\n3. Fraudulent activity detected.\n4. Spam or abusive behavior.\n\nIf you believe it was a mistake, please contact support.',
         keywords: ['ban', 'block', 'suspended', 'kyun', 'account'],
       },
       {
-        q: 'Password bhool gaya?',
-        a: 'Login page par "Forgot Password" link par click karein → Email enter karein → Reset link milega email me → Link se naya password set karein.',
+        q: 'Forgot my password?',
+        a: 'Click "Forgot Password" on the login page → Enter your email → You\'ll receive a reset link → Use the link to set a new password.',
         keywords: ['password', 'forgot', 'bhool', 'reset', 'login'],
       },
       {
-        q: 'Ek device se ek hi account bana sakte hain?',
-        a: 'Haan, fraud prevention ke liye ek device se sirf ek account allowed hai. Agar aap naya account banana chahte hain to pehle wala delete karna hoga. Multiple accounts se ban ho sakta hai.',
+        q: 'Can I create only one account per device?',
+        a: 'Yes, for fraud prevention, only one account is allowed per device. If you want to create a new account, the previous one must be deleted first. Using multiple accounts may result in a ban.',
         keywords: ['device', 'account', 'multiple', 'ek', 'new'],
       },
     ],
@@ -92,18 +112,18 @@ const buildFAQ = ({ minWithdrawal, referralBonus }) => [
     category: 'Referral Program',
     questions: [
       {
-        q: 'Referral se kaise kamayein?',
-        a: 'Profile page → "Refer & Earn" par jayein → Apna referral code ya link share karein → Jab aapka friend signup karke pehla review complete karega → Dono ko bonus milega!',
+        q: 'How to earn through referrals?',
+        a: 'Go to Profile → "Refer & Earn" → Share your referral code or link → When your friend signs up and completes their first review → Both of you earn a bonus!',
         keywords: ['referral', 'refer', 'earn', 'code', 'share', 'friend'],
       },
       {
-        q: 'Referral bonus kab milta hai?',
-        a: `Referral bonus tab milta hai jab aapke dwara referred user ka pehla review approve ho jata hai. Tab ₹${referralBonus} aapke wallet me automatically credit ho jata hai.`,
+        q: 'When do I receive the referral bonus?',
+        a: `The referral bonus is awarded when your referred user's first review is approved. ₹${referralBonus} will be automatically added to your wallet. Minimum balance of ₹${minWithdrawal} is required to withdraw.`,
         keywords: ['referral', 'bonus', 'kab', 'credit', 'when'],
       },
       {
-        q: 'Referral code kaise apply karein?',
-        a: 'Referral page par "Have a referral code?" section me code enter karein aur "Apply" button dabayein. Note: Sirf signup ke baad ek baar hi apply kar sakte hain.',
+        q: 'How to apply a referral code?',
+        a: 'Go to the Referral page → Enter the code in "Have a referral code?" section → Tap "Apply". Note: You can only apply a referral code once after signup.',
         keywords: ['apply', 'code', 'referral', 'enter', 'use'],
       },
     ],
@@ -160,7 +180,7 @@ export default function HelpSupport() {
         <div className="relative">
           <HelpCircle size={24} className="mb-2 opacity-80" />
           <h2 className="text-lg font-bold">Help & Support</h2>
-          <p className="text-xs text-white/80">Apne sawal ka jawab yahan dhundhein</p>
+          <p className="text-xs text-white/80">Find answers to your questions here</p>
         </div>
       </div>
 
@@ -169,7 +189,7 @@ export default function HelpSupport() {
         <Search size={18} className="absolute left-3 top-3.5 text-slate-400" />
         <input
           className="input pl-10"
-          placeholder="Apna sawal type karein... (e.g. paise kab milenge)"
+          placeholder="Type your question... (e.g. when will I get paid)"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -183,7 +203,7 @@ export default function HelpSupport() {
           </p>
           {filtered.length === 0 ? (
             <div className="card py-6 text-center">
-              <p className="text-sm text-slate-400">Koi result nahi mila. Neeche contact karein.</p>
+              <p className="text-sm text-slate-400">No results found. Try contacting support below.</p>
             </div>
           ) : (
             filtered.map((item, i) => (
@@ -246,7 +266,7 @@ export default function HelpSupport() {
         <h3 className="flex items-center gap-2 font-bold">
           <MessageCircle size={16} className="text-brand-500" /> Contact Us
         </h3>
-        <p className="text-xs text-slate-400">Agar aapka sawal upar nahi mila to humse contact karein:</p>
+        <p className="text-xs text-slate-400">Couldn't find your answer? Reach out to us:</p>
 
         <a
           href="mailto:support@rewardreview.app"

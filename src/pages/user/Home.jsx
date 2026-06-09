@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ChevronRight, Flame, Check, Clock, Grid3x3, Gift } from 'lucide-react'
+import { Search, ChevronRight, Flame, Check, Clock, Grid3x3, Gift, Download, Star } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
@@ -16,8 +16,10 @@ export default function Home() {
   const nav = useNavigate()
   const [apps, setApps] = useState([])
   const [reviewed, setReviewed] = useState({})
+  const [installed, setInstalled] = useState({})
   const [cat, setCat] = useState('All')
   const [q, setQ] = useState('')
+  const [taskTab, setTaskTab] = useState('review') // 'review' or 'install'
   const [claim, setClaim] = useState({ claimedToday: false, day: 0 })
   const [claiming, setClaiming] = useState(false)
 
@@ -59,6 +61,11 @@ export default function Home() {
       ;(revs ?? []).forEach((r) => (map[r.app_id] = r.status))
       setReviewed(map)
 
+      const { data: instSubs } = await supabase.from('install_submissions').select('app_id,status')
+      const instMap = {}
+      ;(instSubs ?? []).forEach((r) => (instMap[r.app_id] = r.status))
+      setInstalled(instMap)
+
       const { data: today } = await supabase
         .from('daily_claims')
         .select('day_number,claim_date')
@@ -82,12 +89,19 @@ export default function Home() {
 
   const filtered = apps.filter(
     (a) =>
+      (a.task_type || 'review') === taskTab &&
       (cat === 'All' || a.category === cat) &&
       a.name.toLowerCase().includes(q.toLowerCase()),
   )
 
-  const potential = apps
+  const reviewApps = apps.filter((a) => (a.task_type || 'review') === 'review')
+  const installApps = apps.filter((a) => a.task_type === 'install')
+
+  const potential = reviewApps
     .filter((a) => !reviewed[a.id])
+    .reduce((s, a) => s + Number(a.reward_amount), 0)
+    + installApps
+    .filter((a) => !installed[a.id])
     .reduce((s, a) => s + Number(a.reward_amount), 0)
 
   const doClaim = async () => {
@@ -153,16 +167,16 @@ export default function Home() {
         <div className="absolute -bottom-10 left-10 h-16 w-16 rounded-full bg-white/5 blur-xl" />
         <div className="decor-leaf leaf-1" />
         <div className="decor-leaf leaf-2" />
-        <div className="relative flex items-start justify-between">
-          <div>
-            <p className="text-xs text-white/80">Your Balance</p>
-            <p className="mt-0.5 text-2xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-white/80">Potential Earnings</p>
-            <p className="mt-0.5 text-xl font-bold">{rupee(potential)}</p>
-            <p className="text-xs text-white/70">From {apps.filter((a) => !reviewed[a.id]).length} available apps</p>
-          </div>
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-xs text-white/80">Your Balance</p>
+              <p className="mt-0.5 text-2xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-white/80">Potential Earnings</p>
+              <p className="mt-0.5 text-xl font-bold">{rupee(potential)}</p>
+              <p className="text-xs text-white/70">From {reviewApps.filter((a) => !reviewed[a.id]).length + installApps.filter((a) => !installed[a.id]).length} available tasks</p>
+            </div>
         </div>
       </div>
 
@@ -180,6 +194,30 @@ export default function Home() {
         </div>
         <ChevronRight size={14} className="text-violet-400" />
       </button>
+
+      {/* Task Type Tabs — Review vs Install */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setTaskTab('review')}
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition ${
+            taskTab === 'review'
+              ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/40'
+              : 'bg-white text-slate-500 border border-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400'
+          }`}
+        >
+          <Star size={15} /> Review Apps
+        </button>
+        <button
+          onClick={() => setTaskTab('install')}
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition ${
+            taskTab === 'install'
+              ? 'bg-cyan-500 text-white shadow-sm shadow-cyan-500/40'
+              : 'bg-white text-slate-500 border border-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400'
+          }`}
+        >
+          <Download size={15} /> Install Apps
+        </button>
+      </div>
 
       {/* Categories — horizontally scrollable strip (drag + wheel + touch) */}
       <div
@@ -220,42 +258,49 @@ export default function Home() {
 
       {/* ===== Scrollable apps list ===== */}
       <div className="no-scrollbar flex-1 space-y-3 overflow-y-auto pb-2">
-        {filtered.length === 0 && <p className="py-10 text-center text-slate-400">No apps found.</p>}
+        {filtered.length === 0 && <p className="py-10 text-center text-slate-400">{taskTab === 'install' ? 'No install tasks found.' : 'No apps found.'}</p>}
         {filtered.map((a, idx) => {
-          const status = reviewed[a.id]
+          const status = taskTab === 'install' ? installed[a.id] : reviewed[a.id]
           return (
             <button
               key={a.id}
-              onClick={() => nav(`/app/${a.id}`)}
+              onClick={() => nav(taskTab === 'install' ? `/install-task/${a.id}` : `/app/${a.id}`)}
               disabled={!!status}
               style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}
-              className="card-hover flex w-full animate-slide-up items-center gap-2.5 text-left disabled:opacity-60"
+              className={`card-hover flex w-full animate-slide-up items-center gap-2.5 text-left disabled:opacity-60 border-l-4 ${
+                taskTab === 'install' ? 'border-l-cyan-500' : 'border-l-brand-500'
+              }`}
             >
               {a.icon_url ? (
                 <img src={a.icon_url} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
               ) : (
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-100 text-lg font-bold text-brand-600">
+                <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl text-lg font-bold ${taskTab === 'install' ? 'bg-cyan-100 text-cyan-600' : 'bg-brand-100 text-brand-600'}`}>
                   {a.name[0]}
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold">{a.name}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate text-sm font-bold">{a.name}</p>
+                  <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold ${taskTab === 'install' ? 'bg-cyan-100 text-cyan-600 dark:bg-cyan-500/15' : 'bg-brand-50 text-brand-600 dark:bg-brand-500/15'}`}>
+                    {taskTab === 'install' ? '📲 Install' : '⭐ Review'}
+                  </span>
+                </div>
                 <p className="truncate text-xs text-slate-400">{a.description}</p>
                 <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400">
                   <span>{a.slots_left} slots</span>
                   <span className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-800">{a.category}</span>
                   <span className="flex items-center gap-0.5"><Clock size={10} /> ~{a.est_time_min}m</span>
-                  {a.two_step && <span className="rounded bg-violet-100 px-1 py-0.5 font-semibold text-violet-600 dark:bg-violet-500/15">2-Step</span>}
+                  {taskTab === 'review' && a.two_step && <span className="rounded bg-violet-100 px-1 py-0.5 font-semibold text-violet-600 dark:bg-violet-500/15">2-Step</span>}
                 </div>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
-                <span className="badge bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-600 dark:bg-emerald-500/10">{rupee(a.reward_amount)}</span>
+                <span className={`badge px-2 py-0.5 text-xs font-bold ${taskTab === 'install' ? 'bg-cyan-50 text-cyan-600 dark:bg-cyan-500/10' : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10'}`}>{rupee(a.reward_amount)}</span>
                 {status ? (
                   <span className={`text-xs font-semibold capitalize ${status === 'approved' ? 'text-emerald-500' : status === 'rejected' ? 'text-rose-500' : 'text-amber-500'}`}>
                     {status}
                   </span>
                 ) : (
-                  <ChevronRight size={15} className="text-brand-500" />
+                  <ChevronRight size={15} className={taskTab === 'install' ? 'text-cyan-500' : 'text-brand-500'} />
                 )}
               </div>
             </button>

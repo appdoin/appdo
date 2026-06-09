@@ -15,6 +15,7 @@ import Profile from './pages/user/Profile'
 import Notifications from './pages/user/Notifications'
 import Referral from './pages/user/Referral'
 import HelpSupport from './pages/user/HelpSupport'
+import InstallTaskDetail from './pages/user/InstallTaskDetail'
 
 function Splash() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
       <Route element={<Protected><UserLayout /></Protected>}>
         <Route path="/" element={<Home />} />
         <Route path="/app/:id" element={<AppDetail />} />
+        <Route path="/install-task/:id" element={<InstallTaskDetail />} />
         <Route path="/rewards" element={<Rewards />} />
         <Route path="/history" element={<History />} />
         <Route path="/wallet" element={<Wallet />} />

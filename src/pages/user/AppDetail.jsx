@@ -30,6 +30,11 @@ export default function AppDetail() {
 
   useEffect(() => {
     supabase.from('apps').select('*').eq('id', id).single().then(({ data }) => {
+      // If this is an install task, redirect to the correct page
+      if (data?.task_type === 'install') {
+        nav(`/install-task/${id}`, { replace: true })
+        return
+      }
       setApp(data)
       setText(data?.review_template || '')
     })
@@ -139,7 +144,7 @@ export default function AppDetail() {
         p_opened_store: opened,
       })
       if (error) throw error
-      toast.success('Proof submitted! Reward credited after approval.')
+      toast.success('Proof submitted! Reward will be added to your wallet after approval.')
       nav('/history')
     } catch (err) {
       toast.error(niceError(err))
@@ -232,7 +237,7 @@ export default function AppDetail() {
             `Open the app for ${app.wait_seconds} seconds after installation`,
             'Go back to Play Store and give 5 Star Rating with positive comment',
             'Take screenshot of your 5-star review and submit here',
-            `Done! ${rupee(app.reward_amount)} will be credited after verification`,
+            `Done! ${rupee(app.reward_amount)} will be added to your wallet after verification`,
           ].map((s, i) => (
             <li key={i} className="flex gap-2">
               <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold ${i === 4 ? 'bg-emerald-500 text-white' : 'bg-brand-100 text-brand-600'}`}>{i + 1}</span>
@@ -288,6 +293,10 @@ export default function AppDetail() {
         <button onClick={submit} disabled={!ready || busy || (app.two_step && !twoStepReady)} className="btn-primary w-full">
           {busy ? 'Submitting…' : 'Submit Proof'}
         </button>
+
+        <p className="mt-2 text-center text-[11px] text-slate-400">
+          💰 Reward will be added to your wallet. You can withdraw once you reach the minimum limit.
+        </p>
       </div>
 
       {/* Bottom back button */}

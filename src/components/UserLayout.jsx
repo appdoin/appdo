@@ -29,7 +29,7 @@ export default function UserLayout() {
   const { unreadCount } = useNotifications()
   const { dark, toggle } = useTheme()
   const { pathname } = useLocation()
-  const title = TITLES[pathname] || (pathname.startsWith('/app/') ? '' : 'RewardReview')
+  const title = TITLES[pathname] || (pathname.startsWith('/app/') ? '' : pathname.startsWith('/install-task/') ? '' : 'RewardReview')
 
   const initials = (profile?.full_name || 'U')
     .split(' ')
