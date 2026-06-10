@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ExternalLink, Timer, ImagePlus, ArrowLeft, CheckCircle2, Clock, ImageIcon, Camera, MessageSquare } from 'lucide-react'
+import { ExternalLink, Timer, ImagePlus, ArrowLeft, CheckCircle2, Clock, ImageIcon, Camera, MessageSquare, Copy, Check, Sparkles, Loader } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
 import { rupee, niceError } from '../../lib/format'
 import { generateFingerprint, detectSuspiciousEnv } from '../../lib/fingerprint'
+import { generateReviewComment } from '../../lib/groqService'
 
 export default function AppDetail() {
   const { id } = useParams()
@@ -18,13 +19,17 @@ export default function AppDetail() {
   const [app, setApp] = useState(null)
   const [opened, setOpened] = useState(false)
   const [seconds, setSeconds] = useState(0)
-  const [text, setText] = useState('')
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
   const [busy, setBusy] = useState(false)
   // Two-step state
   const [installation, setInstallation] = useState(null)
   const [markingInstall, setMarkingInstall] = useState(false)
+  // AI Review comment state
+  const [assignedComment, setAssignedComment] = useState(null)
+  const [assignedStars, setAssignedStars] = useState(5)
+  const [commentLoading, setCommentLoading] = useState(true)
+  const [copied, setCopied] = useState(false)
   // Fraud tracking: page open time
   const pageOpenTime = useRef(Date.now())
 
@@ -36,13 +41,72 @@ export default function AppDetail() {
         return
       }
       setApp(data)
-      setText(data?.review_template || '')
+      setAssignedStars(data?.required_stars || 5)
     })
     // Check if user has already marked installation (for two-step)
     supabase.from('app_installations').select('*').eq('app_id', id).maybeSingle().then(({ data }) => {
       setInstallation(data)
     })
+    // Fetch AI-generated review comment for this user
+    loadAiComment()
   }, [id])
+
+  const loadAiComment = async () => {
+    setCommentLoading(true)
+    try {
+      const { data } = await supabase
+        .from('user_review_comments')
+        .select('comment, stars')
+        .eq('app_id', id)
+        .eq('user_id', session.user.id)
+        .maybeSingle()
+
+      if (data?.comment) {
+        setAssignedComment(data.comment)
+        setAssignedStars(data.stars || 5)
+      } else {
+        // No pre-generated comment — generate one on-the-fly
+        await generateOnTheFly()
+      }
+    } catch (err) {
+      console.error('Failed to load AI comment:', err)
+      await generateOnTheFly()
+    } finally {
+      setCommentLoading(false)
+    }
+  }
+
+  const generateOnTheFly = async () => {
+    try {
+      // Wait for app data to be available
+      const { data: appData } = await supabase.from('apps').select('name, description, category, required_stars, review_language').eq('id', id).single()
+      if (!appData) return
+
+      const comment = await generateReviewComment({
+        name: appData.name,
+        description: appData.description,
+        category: appData.category,
+        language: appData.review_language || 'hinglish',
+      })
+
+      const stars = appData.required_stars || 5
+
+      // Save to DB for future reference
+      await supabase.from('user_review_comments').upsert({
+        user_id: session.user.id,
+        app_id: id,
+        comment,
+        stars,
+      }, { onConflict: 'user_id,app_id' })
+
+      setAssignedComment(comment)
+      setAssignedStars(stars)
+    } catch (err) {
+      console.error('On-the-fly generation failed:', err)
+      // Fallback — let user know
+      toast.error('Could not generate review comment. Please try again.')
+    }
+  }
 
   // countdown timer after opening play store
   useEffect(() => {
@@ -94,6 +158,29 @@ export default function AppDetail() {
     }
   }
 
+  const copyComment = async () => {
+    if (!assignedComment) return
+    try {
+      await navigator.clipboard.writeText(assignedComment)
+      setCopied(true)
+      toast.success('Comment copied! Paste it in Play Store.')
+      setTimeout(() => setCopied(false), 3000)
+    } catch {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea')
+      textArea.value = assignedComment
+      textArea.style.position = 'fixed'
+      textArea.style.opacity = '0'
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+      setCopied(true)
+      toast.success('Comment copied!')
+      setTimeout(() => setCopied(false), 3000)
+    }
+  }
+
   const pickFile = (e) => {
     const f = e.target.files?.[0]
     if (!f) return
@@ -111,6 +198,7 @@ export default function AppDetail() {
 
   const submit = async () => {
     if (!file) return toast.error('Please upload your review screenshot.')
+    if (!assignedComment) return toast.error('No review comment assigned. Please wait or refresh.')
     if (app?.two_step && !twoStepReady) return toast.error(`Please wait ${hoursLeft}h before submitting.`)
     setBusy(true)
     try {
@@ -137,11 +225,13 @@ export default function AppDetail() {
 
       const { error } = await supabase.rpc('submit_review', {
         p_app_id: id,
-        p_review_text: text,
+        p_review_text: assignedComment,
         p_screenshot_url: pub.publicUrl,
         p_device_fingerprint: fingerprint,
         p_time_spent_seconds: timeSpent,
         p_opened_store: opened,
+        p_assigned_comment: assignedComment,
+        p_assigned_stars: assignedStars,
       })
       if (error) throw error
       toast.success('Proof submitted! Reward will be added to your wallet after approval.')
@@ -235,8 +325,8 @@ export default function AppDetail() {
           {[
             'Click "Open in Play Store" button above & download the app',
             `Open the app for ${app.wait_seconds} seconds after installation`,
-            'Go back to Play Store and give 5 Star Rating with positive comment',
-            'Take screenshot of your 5-star review and submit here',
+            `Copy the review comment below and paste it in Play Store with ${assignedStars} Star Rating`,
+            'Take screenshot of your review and submit here',
             `Done! ${rupee(app.reward_amount)} will be added to your wallet after verification`,
           ].map((s, i) => (
             <li key={i} className="flex gap-2">
@@ -260,23 +350,72 @@ export default function AppDetail() {
         </div>
       )}
 
-      {/* Review text + screenshot */}
-      <div className="card space-y-3 animate-slide-up">
-        <div>
-          <label className="text-sm font-semibold">Review Text (optional)</label>
-          {app.review_template && (
-            <button
-              type="button"
-              onClick={() => setText(app.review_template)}
-              className="mt-1.5 mb-1 block max-w-full truncate rounded-full bg-brand-50 px-3 py-1 text-left text-xs font-medium text-brand-600 transition hover:bg-brand-100 active:scale-95 dark:bg-brand-500/10 dark:text-brand-300"
-              title="Tap to use suggested review"
-            >
-              💡 {app.review_template.slice(0, 40)}{app.review_template.length > 40 ? '…' : ''}
-            </button>
-          )}
-          <textarea className="input mt-1 min-h-[90px] resize-none" placeholder="Write or paste your review text here…" value={text} onChange={(e) => setText(e.target.value)} />
+      {/* AI Generated Review Comment — THE KEY FEATURE */}
+      <div className="card border-2 border-violet-300 bg-gradient-to-br from-violet-50 to-purple-50 dark:border-violet-500/30 dark:from-violet-500/5 dark:to-purple-500/5">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="grid h-8 w-8 place-items-center rounded-lg bg-violet-500 text-white">
+            <Sparkles size={16} />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-violet-700 dark:text-violet-300">Your Review Comment</p>
+            <p className="text-[10px] text-violet-500">Copy this exact comment and paste it in Play Store</p>
+          </div>
         </div>
 
+        {commentLoading ? (
+          <div className="flex items-center justify-center gap-2 py-6 text-violet-500">
+            <Loader size={18} className="animate-spin" />
+            <span className="text-sm font-medium">Generating your unique review...</span>
+          </div>
+        ) : assignedComment ? (
+          <div className="space-y-3">
+            {/* Comment text */}
+            <div className="rounded-xl bg-white p-3 shadow-sm dark:bg-slate-800">
+              <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200 select-all">{assignedComment}</p>
+            </div>
+
+            {/* Star rating display */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500">Required Rating:</span>
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <span key={s} className={`text-lg ${s <= assignedStars ? 'text-amber-400' : 'text-slate-300'}`}>★</span>
+                ))}
+              </div>
+              <span className="text-xs font-bold text-amber-600">{assignedStars} Stars</span>
+            </div>
+
+            {/* Copy button */}
+            <button
+              onClick={copyComment}
+              className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold shadow-sm transition active:scale-[0.98] ${
+                copied
+                  ? 'bg-emerald-500 text-white shadow-emerald-500/30'
+                  : 'bg-violet-500 text-white shadow-violet-500/30 hover:bg-violet-600'
+              }`}
+            >
+              {copied ? <Check size={18} /> : <Copy size={18} />}
+              {copied ? 'Copied! Now paste in Play Store' : 'Copy Review Comment'}
+            </button>
+
+            {/* Warning */}
+            <div className="rounded-xl bg-rose-50 p-2.5 text-center dark:bg-rose-500/10">
+              <p className="text-xs font-bold text-rose-600 dark:text-rose-400">⚠️ Important</p>
+              <p className="mt-0.5 text-[11px] text-rose-500">
+                Paste this EXACT comment in Play Store. Your screenshot will be AI-verified. If the comment doesn't match, you won't receive payment.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="py-4 text-center">
+            <p className="text-sm text-violet-500">Failed to generate comment</p>
+            <button onClick={generateOnTheFly} className="btn-soft mt-2 text-xs">Retry</button>
+          </div>
+        )}
+      </div>
+
+      {/* Screenshot Upload */}
+      <div className="card space-y-3 animate-slide-up">
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={pickFile} />
         <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={pickFile} />
 
@@ -290,6 +429,7 @@ export default function AppDetail() {
             <>
               <ImagePlus size={30} className="mx-auto text-slate-400" />
               <p className="mt-2 text-sm font-semibold text-slate-500">Upload Review Screenshot</p>
+              <p className="mt-1 text-[11px] text-slate-400">Screenshot must show your review with the exact comment and {assignedStars} star rating</p>
               <div className="mt-3 flex items-center justify-center gap-2">
                 <button type="button" onClick={() => fileRef.current?.click()} className="btn-soft px-4 py-2 text-sm">
                   <ImageIcon size={16} /> Gallery
@@ -303,7 +443,7 @@ export default function AppDetail() {
           )}
         </div>
 
-        <button onClick={submit} disabled={!ready || busy || (app.two_step && !twoStepReady)} className="btn-primary w-full">
+        <button onClick={submit} disabled={!ready || busy || (app.two_step && !twoStepReady) || !assignedComment} className="btn-primary w-full">
           {busy ? 'Submitting…' : 'Submit Proof'}
         </button>
 

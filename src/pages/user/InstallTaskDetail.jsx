@@ -142,14 +142,6 @@ export default function InstallTaskDetail() {
         </div>
       )}
 
-      {/* Admin Instructions (if any) */}
-      {app.review_template && (
-        <div className="card">
-          <h3 className="mb-2 text-sm font-bold text-cyan-600">📋 Admin Instructions</h3>
-          <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-800/50 dark:text-slate-300">{app.review_template}</p>
-        </div>
-      )}
-
       {/* Single Screenshot Upload — Play Store screenshot */}
       <div className="card space-y-3 animate-slide-up">
         <h3 className="font-bold">📱 Play Store Screenshot</h3>

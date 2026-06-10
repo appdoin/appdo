@@ -1,0 +1,20 @@
+User-agent: *
+Disallow: /
+
+# Block all search engines and crawlers
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
+
+User-agent: Yandex
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: DuckDuckBot
+Disallow: /
+
+# No sitemap
