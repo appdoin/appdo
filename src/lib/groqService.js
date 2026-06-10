@@ -9,11 +9,16 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 /**
  * Generate a unique, natural-sounding review comment for an app.
  * @param {Object} appDetails - { name, description, category, language }
+ * @param {string[]} existingComments - Previously generated comments (to avoid duplicates)
  * @returns {Promise<string>} The generated review comment
  */
-export async function generateReviewComment(appDetails) {
+export async function generateReviewComment(appDetails, existingComments = []) {
   const { name, description, category, language } = appDetails
   const lang = language || 'hinglish'
+
+  const avoidList = existingComments.length > 0
+    ? `\n\nIMPORTANT: These comments have already been generated for other users. Write something COMPLETELY DIFFERENT:\n${existingComments.slice(-10).map((c, i) => `${i + 1}. "${c}"`).join('\n')}`
+    : ''
 
   const languageInstruction = lang === 'english'
     ? `2. Write in PURE ENGLISH — natural, casual, conversational American/Indian English. Do NOT mix Hindi words.
@@ -37,7 +42,7 @@ ${languageInstruction}
 7. Don't use emojis excessively — max 1-2 if at all
 8. Don't mention "Play Store" or "download" or "review"
 9. Vary the tone — sometimes enthusiastic, sometimes calm, sometimes practical
-10. Make it feel like a real person's honest opinion`
+10. Make it feel like a real person's honest opinion${avoidList}`
 
   const res = await fetch(GROQ_API_URL, {
     method: 'POST',

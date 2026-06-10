@@ -82,12 +82,22 @@ export default function AppDetail() {
       const { data: appData } = await supabase.from('apps').select('name, description, category, required_stars, review_language').eq('id', id).single()
       if (!appData) return
 
+      // Fetch the 15 most recent comments for this app to pass as an avoid list (ensures high uniqueness)
+      const { data: recentComments } = await supabase
+        .from('user_review_comments')
+        .select('comment')
+        .eq('app_id', id)
+        .order('created_at', { ascending: false })
+        .limit(15)
+
+      const existingComments = (recentComments ?? []).map((c) => c.comment)
+
       const comment = await generateReviewComment({
         name: appData.name,
         description: appData.description,
         category: appData.category,
         language: appData.review_language || 'hinglish',
-      })
+      }, existingComments)
 
       const stars = appData.required_stars || 5
 
