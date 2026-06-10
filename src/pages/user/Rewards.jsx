@@ -51,7 +51,13 @@ export default function Rewards() {
       })
 
       const today = new Date().toISOString().slice(0, 10)
-      const { data: spin } = await supabase.from('spins').select('spin_date').eq('spin_date', today).maybeSingle()
+      // IMPORTANT: filter by user_id so cross-device login can't bypass the daily limit
+      const { data: spin } = await supabase
+        .from('spins')
+        .select('spin_date')
+        .eq('user_id', profile?.id)
+        .eq('spin_date', today)
+        .maybeSingle()
       setSpunToday(!!spin)
 
       const { count } = await supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('status', 'approved')
@@ -93,7 +99,18 @@ export default function Rewards() {
     setWon(null)
     try {
       const { data, error } = await supabase.rpc('do_daily_spin')
-      if (error) throw error
+
+      // Server says already spun (e.g. spun on another device) — update UI silently
+      if (error) {
+        if (error.message?.includes('ALREADY_SPUN_TODAY')) {
+          setSpunToday(true)
+          setSpinning(false)
+          toast.info('You already spun today! Come back tomorrow 🕐')
+          return
+        }
+        throw error
+      }
+
       const n = segments.length
       const seg = 360 / n
       const target = 360 * 6 + (360 - (data.index * seg + seg / 2))
