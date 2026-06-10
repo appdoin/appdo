@@ -103,9 +103,12 @@ export function AuthProvider({ children }) {
   }
 
   const signInWithGoogle = async () => {
+    // Use explicit origin so Google OAuth always returns to the user panel
+    // regardless of Supabase Site URL setting
+    const origin = import.meta.env.VITE_APP_URL || window.location.origin
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin },
+      options: { redirectTo: origin },
     })
     if (error) throw error
   }
