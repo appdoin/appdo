@@ -179,10 +179,10 @@ export default function Rewards() {
       </div>
 
       {/* Spin */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-4 shadow-lg shadow-purple-500/30 animate-fade-in">
+      <div className="glass-shine relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-4 shadow-lg shadow-purple-500/25 animate-fade-in">
         {/* decorative blobs */}
-        <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-white/10 blur-2xl animate-pulse-soft" />
-        <div className="absolute -bottom-8 left-4 h-14 w-14 rounded-full bg-white/5 blur-2xl animate-float" />
+        <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10 blur-2xl animate-pulse-soft" />
+        <div className="absolute -bottom-8 left-4 h-16 w-16 rounded-full bg-white/5 blur-2xl animate-float" />
         <div className="decor-leaf leaf-1" style={{ opacity: 0.2 }} />
         <div className="decor-leaf leaf-3" style={{ opacity: 0.15 }} />
         <p className="mb-0.5 text-center text-sm font-extrabold text-white">🎰 Daily Lucky Spin</p>
@@ -267,7 +267,7 @@ export default function Rewards() {
         </div>
         <div className="flex flex-wrap gap-1.5">
           {earnedBadges.map((b) => (
-            <div key={b.key} className="flex items-center gap-1 rounded-lg bg-brand-50 px-2 py-1 dark:bg-brand-500/10">
+            <div key={b.key} className="flex items-center gap-1 rounded-lg bg-brand-50/70 px-2 py-1 backdrop-blur-sm border border-brand-200/30 dark:bg-brand-500/10 dark:border-brand-500/15">
               <span className="text-sm">{b.emoji}</span>
               <span className="text-[10px] font-semibold">{b.label}</span>
             </div>

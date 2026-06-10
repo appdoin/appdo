@@ -262,19 +262,19 @@ export default function AppDetail() {
         <ArrowLeft size={16} /> Back
       </button>
 
-      {/* App header */}
+      {/* App header — Glass */}
       <div className="card">
         <div className="flex items-center gap-3">
           {app.icon_url ? (
-            <img src={app.icon_url} alt="" className="h-14 w-14 rounded-xl object-cover" />
+            <img src={app.icon_url} alt="" className="h-14 w-14 rounded-xl object-cover shadow-sm" />
           ) : (
-            <div className="grid h-14 w-14 place-items-center rounded-xl bg-brand-100 text-xl font-bold text-brand-600">{app.name[0]}</div>
+            <div className="grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-brand-100 to-brand-50 text-xl font-bold text-brand-600 shadow-sm">{app.name[0]}</div>
           )}
           <div className="flex-1">
             <p className="font-bold">{app.name}</p>
             <p className="text-sm text-slate-400">Earn {rupee(app.reward_amount)} for reviewing</p>
           </div>
-          <span className="badge bg-emerald-50 text-emerald-600 px-2.5 py-1 dark:bg-emerald-500/10">{rupee(app.reward_amount)}</span>
+          <span className="badge bg-emerald-50/70 text-emerald-600 px-2.5 py-1 dark:bg-emerald-500/10">{rupee(app.reward_amount)}</span>
         </div>
         <button onClick={openStore} className="btn-primary mt-4 w-full">
           <ExternalLink size={18} /> Open in Play Store
@@ -361,10 +361,10 @@ export default function AppDetail() {
         </div>
       )}
 
-      {/* AI Generated Review Comment — THE KEY FEATURE */}
-      <div className="card border-2 border-violet-300 bg-gradient-to-br from-violet-50 to-purple-50 dark:border-violet-500/30 dark:from-violet-500/5 dark:to-purple-500/5">
+      {/* AI Generated Review Comment — Premium Glass */}
+      <div className="card glass-shine overflow-hidden border-violet-300/40 bg-gradient-to-br from-violet-50/80 to-purple-50/60 dark:border-violet-500/20 dark:from-violet-500/[0.08] dark:to-purple-500/[0.05]">
         <div className="flex items-center gap-2 mb-3">
-          <div className="grid h-8 w-8 place-items-center rounded-lg bg-violet-500 text-white">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-sm shadow-violet-500/30">
             <Sparkles size={16} />
           </div>
           <div>
@@ -381,7 +381,7 @@ export default function AppDetail() {
         ) : assignedComment ? (
           <div className="space-y-3">
             {/* Comment text */}
-            <div className="rounded-xl bg-white p-3 shadow-sm dark:bg-slate-800">
+            <div className="rounded-xl bg-white/70 p-3.5 shadow-sm backdrop-blur-sm border border-white/40 dark:bg-slate-800/60 dark:border-slate-700/40">
               <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200 select-all">{assignedComment}</p>
             </div>
 
@@ -410,7 +410,8 @@ export default function AppDetail() {
             </button>
 
             {/* Warning */}
-            <div className="rounded-xl bg-rose-50 p-2.5 text-center dark:bg-rose-500/10">
+            {/* Warning — Glass */}
+            <div className="rounded-xl bg-rose-50/70 p-2.5 text-center backdrop-blur-sm border border-rose-200/30 dark:bg-rose-500/10 dark:border-rose-500/10">
               <p className="text-xs font-bold text-rose-600 dark:text-rose-400">⚠️ Important</p>
               <p className="mt-0.5 text-[11px] text-rose-500">
                 Paste this EXACT comment in Play Store. Your screenshot will be AI-verified. If the comment doesn't match, you won't receive payment.

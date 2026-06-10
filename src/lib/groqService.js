@@ -8,9 +8,9 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
 // Word count rules per comment_length setting
 const LENGTH_CONFIG = {
-  short:  { rule: '1 sentence only, strictly 8 to 15 words total',   max_tokens: 60  },
-  medium: { rule: '1 to 2 sentences, strictly 16 to 35 words total',  max_tokens: 100 },
-  long:   { rule: '2 to 3 sentences, strictly 36 to 60 words total',  max_tokens: 150 },
+  short:  { rule: 'STRICTLY 2 to 4 words only — very brief, like a quick rating comment',   max_tokens: 30  },
+  medium: { rule: 'STRICTLY 6 to 9 words only — one short sentence',  max_tokens: 50 },
+  long:   { rule: 'STRICTLY 15 to 25 words — 1 to 2 short sentences',  max_tokens: 100 },
 }
 
 /**

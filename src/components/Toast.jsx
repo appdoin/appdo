@@ -32,7 +32,7 @@ export function ToastProvider({ children }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className="pointer-events-auto flex items-center gap-2 rounded-xl bg-white px-4 py-3 shadow-lg ring-1 ring-slate-100 animate-pop max-w-sm w-full dark:bg-slate-800 dark:ring-slate-700"
+            className="pointer-events-auto flex items-center gap-2 rounded-xl px-4 py-3 shadow-lg animate-pop max-w-sm w-full bg-white/80 backdrop-blur-xl border border-white/50 dark:bg-slate-800/80 dark:border-slate-700/50"
           >
             {ICONS[t.type]}
             <span className="text-sm font-medium">{t.message}</span>

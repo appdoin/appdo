@@ -92,9 +92,9 @@ export default function InstallTaskDetail() {
       <div className="card border-l-4 border-l-cyan-500">
         <div className="flex items-center gap-3">
           {app.icon_url ? (
-            <img src={app.icon_url} alt="" className="h-14 w-14 rounded-xl object-cover" />
+            <img src={app.icon_url} alt="" className="h-14 w-14 rounded-xl object-cover shadow-sm" />
           ) : (
-            <div className="grid h-14 w-14 place-items-center rounded-xl bg-cyan-100 text-xl font-bold text-cyan-600">{app.name[0]}</div>
+            <div className="grid h-14 w-14 place-items-center rounded-xl bg-gradient-to-br from-cyan-100 to-cyan-50 text-xl font-bold text-cyan-600 shadow-sm">{app.name[0]}</div>
           )}
           <div className="flex-1">
             <div className="flex items-center gap-2">
@@ -105,7 +105,7 @@ export default function InstallTaskDetail() {
           </div>
           <span className="badge bg-cyan-50 text-cyan-600 px-2.5 py-1 text-base font-bold dark:bg-cyan-500/10">{rupee(app.reward_amount)}</span>
         </div>
-        <button onClick={openStore} className="mt-4 w-full rounded-xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-cyan-500/30 transition hover:bg-cyan-600 active:scale-[0.98] flex items-center justify-center gap-2">
+        <button onClick={openStore} className="mt-4 w-full rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-cyan-500/30 transition hover:shadow-lg active:scale-[0.98] flex items-center justify-center gap-2">
           <Download size={18} /> Download from Play Store
         </button>
       </div>
@@ -150,7 +150,7 @@ export default function InstallTaskDetail() {
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={pickFile} />
         <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={pickFile} />
 
-        <div className="rounded-xl border-2 border-dashed border-cyan-300 p-4 text-center dark:border-cyan-700">
+        <div className="rounded-xl border-2 border-dashed border-cyan-300/60 bg-cyan-50/30 p-4 text-center backdrop-blur-sm dark:border-cyan-700/40 dark:bg-cyan-500/[0.03]">
           {preview ? (
             <div className="space-y-3 animate-pop">
               <img src={preview} alt="preview" className="mx-auto max-h-48 rounded-lg shadow-sm" />
@@ -174,7 +174,7 @@ export default function InstallTaskDetail() {
           )}
         </div>
 
-        <button onClick={submit} disabled={busy || !file} className="w-full rounded-xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-cyan-500/30 transition hover:bg-cyan-600 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+        <button onClick={submit} disabled={busy || !file} className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-cyan-500/30 transition hover:shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
           {busy ? 'Submitting…' : '📲 Submit Screenshot'}
         </button>
 

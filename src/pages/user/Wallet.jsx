@@ -95,16 +95,17 @@ export default function Wallet() {
 
   return (
     <div className="space-y-4 animate-stagger">
-      {/* Balance */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-500 via-brand-600 to-indigo-700 p-5 text-white shadow-lg animate-slide-up">
-        <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10 blur-xl animate-pulse-soft" />
-        <div className="absolute -bottom-8 left-8 h-16 w-16 rounded-full bg-white/5 blur-xl" />
+      {/* Balance — Premium Glass */}
+      <div className="glass-shine relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-500 via-brand-600 to-violet-700 p-5 text-white shadow-lg shadow-brand-500/25 animate-slide-up">
+        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-2xl animate-pulse-soft" />
+        <div className="absolute -bottom-8 left-8 h-20 w-20 rounded-full bg-white/5 blur-2xl" />
+        <div className="absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.03] blur-3xl" />
         <div className="decor-leaf leaf-1" style={{ opacity: 0.25 }} />
         <div className="decor-leaf leaf-2" style={{ opacity: 0.2 }} />
         <div className="decor-leaf leaf-3" style={{ opacity: 0.2 }} />
-        <p className="relative flex items-center gap-1.5 text-xs text-white/80"><CreditCard size={13} /> Available Balance</p>
+        <p className="relative flex items-center gap-1.5 text-[11px] font-medium text-white/70 uppercase tracking-wider"><CreditCard size={13} /> Available Balance</p>
         <p className="relative mt-1 text-3xl font-extrabold tracking-tight">{rupee(profile?.wallet_balance)}</p>
-        <p className="relative mt-1 text-[11px] text-white/70">Total earned {rupee(profile?.total_earned)}</p>
+        <p className="relative mt-1 text-[11px] text-white/60">Total earned {rupee(profile?.total_earned)}</p>
       </div>
 
       {/* WhatsApp verification */}

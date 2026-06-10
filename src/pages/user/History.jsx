@@ -49,10 +49,10 @@ export default function History() {
     <div className="space-y-4">
       {/* Stats */}
       <div className="grid grid-cols-4 gap-2">
-        <div className="stat-card"><p className="text-sm font-bold text-emerald-500">{rupee(stats.earned)}</p><p className="text-xs text-slate-400">Earned</p></div>
-        <div className="stat-card"><p className="text-sm font-bold text-brand-600">{stats.done}</p><p className="text-xs text-slate-400">Done</p></div>
-        <div className="stat-card"><p className="text-sm font-bold text-amber-500">{stats.pending}</p><p className="text-xs text-slate-400">Pending</p></div>
-        <div className="stat-card"><p className="text-sm font-bold text-rose-500">{stats.rejected}</p><p className="text-xs text-slate-400">Rejected</p></div>
+        <div className="stat-card glass-shine"><p className="text-sm font-bold text-emerald-500">{rupee(stats.earned)}</p><p className="text-[10px] text-slate-400">Earned</p></div>
+        <div className="stat-card"><p className="text-sm font-bold text-brand-600">{stats.done}</p><p className="text-[10px] text-slate-400">Done</p></div>
+        <div className="stat-card"><p className="text-sm font-bold text-amber-500">{stats.pending}</p><p className="text-[10px] text-slate-400">Pending</p></div>
+        <div className="stat-card"><p className="text-sm font-bold text-rose-500">{stats.rejected}</p><p className="text-[10px] text-slate-400">Rejected</p></div>
       </div>
 
       {/* Type Tabs — Reviews vs Install Tasks */}
@@ -61,8 +61,8 @@ export default function History() {
           onClick={() => { setTypeTab('reviews'); setTab('All') }}
           className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition ${
             typeTab === 'reviews'
-              ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/40'
-              : 'bg-white text-slate-500 border border-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400'
+              ? 'bg-gradient-to-r from-brand-500 to-violet-500 text-white shadow-md shadow-brand-500/30'
+              : 'card text-slate-500 dark:text-slate-400'
           }`}
         >
           <Star size={14} /> Reviews ({reviews.length})
@@ -71,8 +71,8 @@ export default function History() {
           onClick={() => { setTypeTab('installs'); setTab('All') }}
           className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition ${
             typeTab === 'installs'
-              ? 'bg-cyan-500 text-white shadow-sm shadow-cyan-500/40'
-              : 'bg-white text-slate-500 border border-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400'
+              ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-md shadow-cyan-500/30'
+              : 'card text-slate-500 dark:text-slate-400'
           }`}
         >
           <Download size={14} /> Installs ({installs.length})
@@ -80,7 +80,7 @@ export default function History() {
       </div>
 
       {/* Status Tabs */}
-      <div className="flex rounded-xl bg-white p-1 shadow-card dark:bg-slate-900">
+      <div className="card flex p-1">
         {STATUS_TABS.map((t) => (
           <button key={t} onClick={() => setTab(t)} className={`flex-1 rounded-lg py-2 text-sm font-semibold transition ${tab === t ? (typeTab === 'installs' ? 'bg-cyan-500 text-white' : 'bg-brand-500 text-white') : 'text-slate-500'}`}>
             {t}

@@ -174,9 +174,10 @@ export default function HelpSupport() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="card relative overflow-hidden bg-gradient-to-br from-brand-500 to-violet-600 text-white">
-        <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10 blur-xl" />
+      {/* Header — Glass */}
+      <div className="card glass-shine relative overflow-hidden bg-gradient-to-br from-brand-500 via-brand-600 to-violet-600 text-white shadow-lg shadow-brand-500/25">
+        <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10 blur-2xl" />
+        <div className="absolute left-8 bottom-0 h-14 w-14 rounded-full bg-white/5 blur-2xl" />
         <div className="relative">
           <HelpCircle size={24} className="mb-2 opacity-80" />
           <h2 className="text-lg font-bold">Help & Support</h2>
