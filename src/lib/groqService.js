@@ -6,15 +6,24 @@
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
+// Word count rules per comment_length setting
+const LENGTH_CONFIG = {
+  short:  { rule: '1 sentence only, strictly 8 to 15 words total',   max_tokens: 60  },
+  medium: { rule: '1 to 2 sentences, strictly 16 to 35 words total',  max_tokens: 100 },
+  long:   { rule: '2 to 3 sentences, strictly 36 to 60 words total',  max_tokens: 150 },
+}
+
 /**
  * Generate a unique, natural-sounding review comment for an app.
- * @param {Object} appDetails - { name, description, category, language }
+ * @param {Object} appDetails - { name, description, category, language, comment_length }
  * @param {string[]} existingComments - Previously generated comments (to avoid duplicates)
  * @returns {Promise<string>} The generated review comment
  */
 export async function generateReviewComment(appDetails, existingComments = []) {
-  const { name, description, category, language } = appDetails
+  const { name, description, category, language, comment_length } = appDetails
   const lang = language || 'hinglish'
+  const lengthKey = comment_length || 'short'
+  const { rule, max_tokens } = LENGTH_CONFIG[lengthKey] || LENGTH_CONFIG.short
 
   const avoidList = existingComments.length > 0
     ? `\n\nIMPORTANT: These comments have already been generated for other users. Write something COMPLETELY DIFFERENT:\n${existingComments.slice(-10).map((c, i) => `${i + 1}. "${c}"`).join('\n')}`
@@ -35,11 +44,11 @@ Description: ${description || 'A useful mobile application'}
 Rules:
 1. Write ONLY the review comment text — no quotes, no prefixes, no labels
 ${languageInstruction}
-3. Keep it 1-3 sentences, 15-60 words
+3. LENGTH: ${rule} — this is STRICT, do not exceed or go below
 4. Be specific about features or experience (don't be generic)
 5. Use natural variations — sometimes start with the app name, sometimes with "I"/"Main", sometimes with an action
 6. Include minor natural imperfections (like "its" instead of "it's" sometimes, or casual abbreviations)
-7. Don't use emojis excessively — max 1-2 if at all
+7. Don't use emojis excessively — max 1 if at all
 8. Don't mention "Play Store" or "download" or "review"
 9. Vary the tone — sometimes enthusiastic, sometimes calm, sometimes practical
 10. Make it feel like a real person's honest opinion${avoidList}`
@@ -53,11 +62,11 @@ ${languageInstruction}
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
       messages: [
-        { role: 'system', content: 'You write realistic Play Store app reviews. Output ONLY the review text, nothing else. No quotes around the text.' },
+        { role: 'system', content: `You write realistic Play Store app reviews. Output ONLY the review text, nothing else. No quotes. Strictly follow the word count: ${rule}.` },
         { role: 'user', content: prompt },
       ],
-      temperature: 1.2,
-      max_tokens: 150,
+      temperature: 1.1,
+      max_tokens,
       top_p: 0.95,
     }),
   })
@@ -69,7 +78,7 @@ ${languageInstruction}
 
   const data = await res.json()
   let comment = data.choices?.[0]?.message?.content?.trim() || ''
-  comment = comment.replace(/^["']+|["']+$/g, '').trim()
+  comment = comment.replace(/^[\"']+|[\"']+$/g, '').trim()
   if (!comment) throw new Error('Empty response from Groq')
   return comment
 }

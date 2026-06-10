@@ -97,6 +97,7 @@ export default function AppDetail() {
         description: appData.description,
         category: appData.category,
         language: appData.review_language || 'hinglish',
+        comment_length: appData.comment_length || 'short',
       }, existingComments)
 
       const stars = appData.required_stars || 5
