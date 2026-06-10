@@ -111,10 +111,9 @@ export default function Referral() {
 
   return (
     <div className="space-y-3">
-      {/* How it works banner — Glass */}
-      <div className="card glass-shine relative overflow-hidden bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25">
-        <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10 blur-2xl" />
-        <div className="absolute left-1/4 bottom-0 h-16 w-16 rounded-full bg-white/5 blur-2xl" />
+      {/* How it works banner */}
+      <div className="card relative overflow-hidden bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/20">
+        <div className="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-white/10 blur-xl" />
         <div className="relative">
           <Gift size={20} className="mb-1 opacity-80" />
           <p className="text-sm font-bold">Refer Friends & Earn ₹{bonusAmount} Each!</p>

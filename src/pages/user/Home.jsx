@@ -126,12 +126,12 @@ export default function Home() {
       {/* Announcements */}
       <AnnouncementBanner />
 
-      {/* Daily claim — glass card */}
+      {/* Daily claim */}
       <div className="card relative overflow-hidden py-3 animate-fade-in">
         <div className="decor-leaf leaf-3" style={{ opacity: 0.08 }} />
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className={`grid h-9 w-9 place-items-center rounded-xl transition-all duration-300 ${claim.claimedToday ? 'bg-emerald-100/80 text-emerald-600 animate-pop' : 'bg-brand-100/80 text-brand-600 animate-pulse-soft'}`}>
+          <div className="flex items-center gap-2">
+            <div className={`grid h-8 w-8 place-items-center rounded-full transition-all duration-300 ${claim.claimedToday ? 'bg-emerald-100 text-emerald-600 animate-pop' : 'bg-brand-100 text-brand-600 animate-pulse-soft'}`}>
               {claim.claimedToday ? <Check size={16} /> : <Flame size={16} />}
             </div>
             <div>
@@ -151,10 +151,8 @@ export default function Home() {
           {[1, 2, 3, 4, 5, 6, 7].map((d) => (
             <div
               key={d}
-              className={`grid h-7 w-7 place-items-center rounded-full text-xs font-semibold transition-all ${
-                d <= claim.day
-                  ? 'bg-gradient-to-br from-emerald-400 to-emerald-500 text-white shadow-sm shadow-emerald-500/30'
-                  : 'bg-slate-100/60 text-slate-400 dark:bg-slate-800/60'
+              className={`grid h-7 w-7 place-items-center rounded-full text-xs font-semibold ${
+                d <= claim.day ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'
               }`}
             >
               {d}
@@ -163,32 +161,31 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Balance / potential — Premium glass gradient */}
-      <div className="gradient-brand glass-shine relative overflow-hidden rounded-2xl p-4 text-white shadow-lg shadow-brand-500/25 animate-slide-up">
-        <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/10 blur-2xl animate-pulse-soft" />
-        <div className="absolute -bottom-10 left-10 h-20 w-20 rounded-full bg-white/5 blur-2xl" />
-        <div className="absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.03] blur-3xl" />
+      {/* Balance / potential */}
+      <div className="gradient-brand relative overflow-hidden rounded-2xl p-4 text-white shadow-md shadow-brand-500/30 animate-slide-up">
+        <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-white/10 blur-xl animate-pulse-soft" />
+        <div className="absolute -bottom-10 left-10 h-16 w-16 rounded-full bg-white/5 blur-xl" />
         <div className="decor-leaf leaf-1" />
         <div className="decor-leaf leaf-2" />
           <div className="relative flex items-start justify-between">
             <div>
-              <p className="text-[11px] font-medium text-white/70 uppercase tracking-wider">Your Balance</p>
-              <p className="mt-1 text-3xl font-extrabold tracking-tight">{rupee(profile?.wallet_balance)}</p>
+              <p className="text-xs text-white/80">Your Balance</p>
+              <p className="mt-0.5 text-2xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
             </div>
             <div className="text-right">
-              <p className="text-[11px] font-medium text-white/70 uppercase tracking-wider">Potential</p>
-              <p className="mt-1 text-xl font-bold">{rupee(potential)}</p>
-              <p className="text-[10px] text-white/60">{reviewApps.filter((a) => !reviewed[a.id]).length + installApps.filter((a) => !installed[a.id]).length} tasks available</p>
+              <p className="text-xs text-white/80">Potential Earnings</p>
+              <p className="mt-0.5 text-xl font-bold">{rupee(potential)}</p>
+              <p className="text-xs text-white/70">From {reviewApps.filter((a) => !reviewed[a.id]).length + installApps.filter((a) => !installed[a.id]).length} available tasks</p>
             </div>
         </div>
       </div>
 
-      {/* Referral mini-banner — glass */}
+      {/* Referral mini-banner */}
       <button
         onClick={() => nav('/referral')}
-        className="card flex w-full items-center gap-2.5 border-violet-200/40 bg-gradient-to-r from-violet-500/[0.06] to-purple-500/[0.06] px-3 py-2.5 text-left transition active:scale-[0.98] dark:border-violet-500/15 dark:from-violet-500/[0.08] dark:to-purple-500/[0.05]"
+        className="flex w-full items-center gap-2.5 rounded-xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-200 px-3 py-2.5 text-left transition active:scale-[0.98] dark:border-violet-500/20 dark:from-violet-500/5 dark:to-purple-500/5"
       >
-        <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-sm shadow-violet-500/30">
+        <div className="grid h-8 w-8 place-items-center rounded-lg bg-violet-500 text-white">
           <Gift size={16} />
         </div>
         <div className="flex-1 min-w-0">
@@ -198,14 +195,14 @@ export default function Home() {
         <ChevronRight size={14} className="text-violet-400" />
       </button>
 
-      {/* Task Type Tabs — Glass toggle */}
+      {/* Task Type Tabs — Review vs Install */}
       <div className="flex gap-2">
         <button
           onClick={() => setTaskTab('review')}
           className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition ${
             taskTab === 'review'
-              ? 'bg-gradient-to-r from-brand-500 to-violet-500 text-white shadow-md shadow-brand-500/30'
-              : 'card text-slate-500 dark:text-slate-400'
+              ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/40'
+              : 'bg-white text-slate-500 border border-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400'
           }`}
         >
           <Star size={15} /> Review Apps
@@ -214,15 +211,15 @@ export default function Home() {
           onClick={() => setTaskTab('install')}
           className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition ${
             taskTab === 'install'
-              ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-md shadow-cyan-500/30'
-              : 'card text-slate-500 dark:text-slate-400'
+              ? 'bg-cyan-500 text-white shadow-sm shadow-cyan-500/40'
+              : 'bg-white text-slate-500 border border-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400'
           }`}
         >
           <Download size={15} /> Install Apps
         </button>
       </div>
 
-      {/* Categories — glass chips */}
+      {/* Categories — horizontally scrollable strip (drag + wheel + touch) */}
       <div
         ref={catRef}
         onPointerDown={onPointerDown}
@@ -242,8 +239,8 @@ export default function Home() {
             }}
             className={`flex shrink-0 select-none items-center gap-1 whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold transition active:scale-95 ${
               cat === c
-                ? 'bg-gradient-to-r from-brand-500 to-violet-500 text-white shadow-sm shadow-brand-500/30'
-                : 'glass-pill text-slate-600 hover:border-brand-300/50 dark:text-slate-300'
+                ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/40'
+                : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
             }`}
           >
             {c === 'All' && <Grid3x3 size={13} />}
@@ -252,9 +249,9 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Search — glass input */}
+      {/* Search */}
       <div className="relative">
-        <Search size={18} className="absolute left-3.5 top-3.5 text-slate-400" />
+        <Search size={18} className="absolute left-3 top-3.5 text-slate-400" />
         <input className="input pl-10" placeholder="Search apps…" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
       </div>
@@ -270,34 +267,34 @@ export default function Home() {
               onClick={() => nav(taskTab === 'install' ? `/install-task/${a.id}` : `/app/${a.id}`)}
               disabled={!!status}
               style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}
-              className={`card-hover flex w-full animate-slide-up items-center gap-2.5 text-left disabled:opacity-60 border-l-[3px] ${
+              className={`card-hover flex w-full animate-slide-up items-center gap-2.5 text-left disabled:opacity-60 border-l-4 ${
                 taskTab === 'install' ? 'border-l-cyan-500' : 'border-l-brand-500'
               }`}
             >
               {a.icon_url ? (
-                <img src={a.icon_url} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover shadow-sm" />
+                <img src={a.icon_url} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
               ) : (
-                <div className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl text-lg font-bold shadow-sm ${taskTab === 'install' ? 'bg-gradient-to-br from-cyan-100 to-cyan-50 text-cyan-600' : 'bg-gradient-to-br from-brand-100 to-brand-50 text-brand-600'}`}>
+                <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl text-lg font-bold ${taskTab === 'install' ? 'bg-cyan-100 text-cyan-600' : 'bg-brand-100 text-brand-600'}`}>
                   {a.name[0]}
                 </div>
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <p className="truncate text-sm font-bold">{a.name}</p>
-                  <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[9px] font-bold ${taskTab === 'install' ? 'bg-cyan-100/60 text-cyan-600 dark:bg-cyan-500/15' : 'bg-brand-50/60 text-brand-600 dark:bg-brand-500/15'}`}>
+                  <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold ${taskTab === 'install' ? 'bg-cyan-100 text-cyan-600 dark:bg-cyan-500/15' : 'bg-brand-50 text-brand-600 dark:bg-brand-500/15'}`}>
                     {taskTab === 'install' ? '📲 Install' : '⭐ Review'}
                   </span>
                 </div>
                 <p className="truncate text-xs text-slate-400">{a.description}</p>
                 <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400">
                   <span>{a.slots_left} slots</span>
-                  <span className="rounded-md bg-slate-100/60 px-1 py-0.5 dark:bg-slate-800/60">{a.category}</span>
+                  <span className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-800">{a.category}</span>
                   <span className="flex items-center gap-0.5"><Clock size={10} /> ~{a.est_time_min}m</span>
-                  {taskTab === 'review' && a.two_step && <span className="rounded-md bg-violet-100/60 px-1 py-0.5 font-semibold text-violet-600 dark:bg-violet-500/15">2-Step</span>}
+                  {taskTab === 'review' && a.two_step && <span className="rounded bg-violet-100 px-1 py-0.5 font-semibold text-violet-600 dark:bg-violet-500/15">2-Step</span>}
                 </div>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
-                <span className={`badge px-2 py-0.5 text-xs font-bold ${taskTab === 'install' ? 'bg-cyan-50/70 text-cyan-600 dark:bg-cyan-500/10' : 'bg-emerald-50/70 text-emerald-600 dark:bg-emerald-500/10'}`}>{rupee(a.reward_amount)}</span>
+                <span className={`badge px-2 py-0.5 text-xs font-bold ${taskTab === 'install' ? 'bg-cyan-50 text-cyan-600 dark:bg-cyan-500/10' : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10'}`}>{rupee(a.reward_amount)}</span>
                 {status ? (
                   <span className={`text-xs font-semibold capitalize ${status === 'approved' ? 'text-emerald-500' : status === 'rejected' ? 'text-rose-500' : 'text-amber-500'}`}>
                     {status}

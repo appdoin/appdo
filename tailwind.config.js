@@ -19,18 +19,10 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         card: '0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04)',
-        'glass': '0 8px 32px rgba(31, 38, 135, 0.08)',
-        'glass-lg': '0 12px 48px rgba(31, 38, 135, 0.12)',
-        'glass-glow': '0 0 24px rgba(99, 102, 241, 0.15)',
-        'inner-glow': 'inset 0 1px 0 rgba(255, 255, 255, 0.5)',
-      },
-      backdropBlur: {
-        'glass': '18px',
-        'glass-lg': '24px',
       },
       keyframes: {
         'fade-in': {
@@ -75,10 +67,6 @@ export default {
           '0%': { transform: 'scale(0)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
-        'glass-shimmer': {
-          '0%': { backgroundPosition: '200% 0' },
-          '100%': { backgroundPosition: '-200% 0' },
-        },
       },
       animation: {
         'fade-in': 'fade-in 0.3s ease-out',
@@ -91,7 +79,6 @@ export default {
         'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
         'spin-slow': 'spin-slow 12s linear infinite',
         'scale-in': 'scale-in 0.3s ease-out',
-        'glass-shimmer': 'glass-shimmer 3s ease-in-out infinite',
       },
     },
   },

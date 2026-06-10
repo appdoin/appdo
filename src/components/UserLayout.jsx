@@ -51,10 +51,7 @@ export default function UserLayout() {
     .toUpperCase()
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col bg-gradient-to-br from-slate-50 via-indigo-50/30 to-violet-50/20 dark:bg-none dark:bg-[#070b14]">
-      {/* Ambient light blobs (light mode) */}
-      <div className="ambient-bg" />
-
+    <div className="mx-auto flex min-h-screen max-w-md flex-col bg-slate-100 dark:bg-[#0a0e1a]">
       {/* Starry dark mode background */}
       <div className="stars-bg" />
       <div className="shooting-star" />
@@ -66,38 +63,38 @@ export default function UserLayout() {
       <span className="petal p3" />
       <span className="petal p4" />
 
-      {/* Header — Frosted Glass */}
-      <header className="glass-nav glass-shine sticky top-0 z-30 flex items-center justify-between gap-2 border-b px-3 py-2.5">
-        <div className="flex items-center gap-2.5">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-violet-600 text-sm font-bold text-white shadow-sm shadow-brand-500/30">
+      {/* Header */}
+      <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-slate-200/30 bg-white/70 px-3 py-2 backdrop-blur-md dark:border-white/5 dark:bg-[#0a0e1a]/60">
+        <div className="flex items-center gap-2">
+          <div className="grid h-8 w-8 place-items-center rounded-lg bg-brand-500 text-sm font-bold text-white">
             {initials}
           </div>
           <div>
             <h1 className="text-base font-bold leading-tight">{title}</h1>
-            <p className="text-[11px] text-slate-400">{profile?.full_name}</p>
+            <p className="text-xs text-slate-400">{profile?.full_name}</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <NavLink to="/referral" className="grid h-8 w-8 place-items-center rounded-xl border border-violet-200/60 bg-violet-50/50 text-violet-500 transition hover:bg-violet-100/60 dark:border-violet-700/40 dark:bg-violet-500/10">
-            <Gift size={14} />
+          <NavLink to="/referral" className="grid h-7 w-7 place-items-center rounded-full border border-violet-200 text-violet-500 dark:border-violet-700">
+            <Gift size={13} />
           </NavLink>
-          <NavLink to="/help" className="grid h-8 w-8 place-items-center rounded-xl border border-slate-200/60 bg-white/40 transition hover:bg-white/60 dark:border-slate-700/40 dark:bg-slate-800/40">
-            <HelpCircle size={14} />
+          <NavLink to="/help" className="grid h-7 w-7 place-items-center rounded-full border border-slate-200 dark:border-slate-700">
+            <HelpCircle size={13} />
           </NavLink>
-          <button onClick={toggle} className="grid h-8 w-8 place-items-center rounded-xl border border-slate-200/60 bg-white/40 transition hover:bg-white/60 dark:border-slate-700/40 dark:bg-slate-800/40">
-            {dark ? <Sun size={14} className="text-amber-400" /> : <Moon size={14} className="text-indigo-500" />}
+          <button onClick={toggle} className="grid h-7 w-7 place-items-center rounded-full border border-slate-200 dark:border-slate-700">
+            {dark ? <Sun size={13} /> : <Moon size={13} />}
           </button>
-          <NavLink to="/notifications" className="relative grid h-8 w-8 place-items-center rounded-xl border border-slate-200/60 bg-white/40 transition hover:bg-white/60 dark:border-slate-700/40 dark:bg-slate-800/40">
-            <Bell size={14} />
+          <NavLink to="/notifications" className="relative grid h-7 w-7 place-items-center rounded-full border border-slate-200 dark:border-slate-700">
+            <Bell size={13} />
             {unreadCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-[16px] place-items-center rounded-full bg-rose-500 px-1 text-[9px] font-bold text-white shadow-sm shadow-rose-500/30">
+              <span className="absolute -right-0.5 -top-0.5 grid h-3.5 min-w-[14px] place-items-center rounded-full bg-rose-500 px-0.5 text-[8px] font-bold text-white">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
           </NavLink>
           <NavLink
             to="/wallet"
-            className="flex items-center gap-1 rounded-xl bg-emerald-50/70 px-2.5 py-1.5 text-xs font-bold text-emerald-600 border border-emerald-200/50 transition hover:bg-emerald-100/70 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+            className="badge bg-emerald-50 text-emerald-600 px-2 py-1 text-xs dark:bg-emerald-500/10 dark:text-emerald-400"
           >
             <Wallet size={12} /> {rupee(profile?.wallet_balance)}
           </NavLink>
@@ -111,8 +108,8 @@ export default function UserLayout() {
         </div>
       </main>
 
-      {/* Bottom navigation — Frosted Glass */}
-      <nav className="glass-nav glass-shine fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md border-t px-2 py-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
+      {/* Bottom navigation */}
+      <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md border-t border-slate-200/30 bg-white/75 px-2 py-2 backdrop-blur-md dark:border-white/5 dark:bg-[#0a0e1a]/65">
         <div className="flex items-center justify-around">
           {NAV.map(({ to, icon: Icon, label }) => (
             <NavLink
@@ -121,16 +118,16 @@ export default function UserLayout() {
               end={to === '/'}
               className={({ isActive }) =>
                 `flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-medium transition ${
-                  isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                  isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <span className={`rounded-xl p-1.5 transition ${isActive ? 'bg-brand-500/10 shadow-sm shadow-brand-500/10 dark:bg-brand-500/15' : ''}`}>
-                    <Icon size={20} strokeWidth={isActive ? 2.2 : 1.8} />
+                  <span className={isActive ? 'rounded-full bg-brand-50 p-1.5 dark:bg-brand-500/10' : 'p-1.5'}>
+                    <Icon size={20} />
                   </span>
-                  <span className={isActive ? 'font-semibold' : ''}>{label}</span>
+                  {label}
                 </>
               )}
             </NavLink>

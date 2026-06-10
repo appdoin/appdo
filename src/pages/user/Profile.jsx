@@ -45,21 +45,21 @@ export default function Profile() {
 
   return (
     <div className="space-y-4">
-      {/* Profile card — Glass */}
+      {/* Profile card */}
       <div className="card">
         <div className="flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-violet-600 text-white shadow-sm shadow-brand-500/30"><UserIcon size={20} /></div>
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500 text-white"><UserIcon size={20} /></div>
           <div>
             <p className="text-sm font-bold">{profile?.full_name}</p>
             <p className="text-xs text-slate-400">{profile?.email}</p>
           </div>
         </div>
-        <div className="glass-shine mt-3 flex items-center justify-between rounded-xl bg-gradient-to-r from-brand-500 via-brand-600 to-violet-600 p-3.5 text-white shadow-md shadow-brand-500/25">
+        <div className="mt-3 flex items-center justify-between rounded-xl bg-gradient-to-r from-brand-500 to-brand-700 p-3 text-white">
           <div>
-            <p className="text-[11px] font-medium text-white/70 uppercase tracking-wider">Wallet Balance</p>
+            <p className="text-xs text-white/80">Wallet Balance</p>
             <p className="text-xl font-extrabold">{rupee(profile?.wallet_balance)}</p>
           </div>
-          <button onClick={() => nav('/wallet')} className="rounded-xl bg-white/20 px-3.5 py-2 text-xs font-bold backdrop-blur-sm border border-white/10 transition hover:bg-white/30">Withdraw</button>
+          <button onClick={() => nav('/wallet')} className="rounded-lg bg-white/20 px-3 py-1.5 text-xs font-semibold">Withdraw</button>
         </div>
       </div>
 
@@ -108,10 +108,10 @@ export default function Profile() {
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-2">
-        <div className="stat-card glass-shine"><p className="text-sm font-bold text-emerald-500">{rupee(profile?.total_earned)}</p><p className="text-[10px] text-slate-400">Earned</p></div>
-        <div className="stat-card"><p className="text-sm font-bold text-brand-600">{stats.approved}</p><p className="text-[10px] text-slate-400">Approved</p></div>
-        <div className="stat-card"><p className="text-sm font-bold text-amber-500">{stats.pending}</p><p className="text-[10px] text-slate-400">Pending</p></div>
-        <div className="stat-card"><p className="text-sm font-bold text-rose-500">{stats.rejected}</p><p className="text-[10px] text-slate-400">Rejected</p></div>
+        <div className="stat-card"><p className="text-sm font-bold text-emerald-500">{rupee(profile?.total_earned)}</p><p className="text-xs text-slate-400">Earned</p></div>
+        <div className="stat-card"><p className="text-sm font-bold text-brand-600">{stats.approved}</p><p className="text-xs text-slate-400">Approved</p></div>
+        <div className="stat-card"><p className="text-sm font-bold text-amber-500">{stats.pending}</p><p className="text-xs text-slate-400">Pending</p></div>
+        <div className="stat-card"><p className="text-sm font-bold text-rose-500">{stats.rejected}</p><p className="text-xs text-slate-400">Rejected</p></div>
       </div>
 
       {/* Badges */}

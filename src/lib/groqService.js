@@ -8,9 +8,9 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
 // Word count rules per comment_length setting
 const LENGTH_CONFIG = {
-  short:  { rule: 'STRICTLY 2 to 4 words only — very brief, like a quick rating comment',   max_tokens: 30  },
-  medium: { rule: 'STRICTLY 6 to 9 words only — one short sentence',  max_tokens: 50 },
-  long:   { rule: 'STRICTLY 15 to 25 words — 1 to 2 short sentences',  max_tokens: 100 },
+  short:  { rule: 'strictly 2 to 4 words total',   max_tokens: 30  },
+  medium: { rule: 'strictly 6 to 9 words total',   max_tokens: 50  },
+  long:   { rule: 'strictly 15 to 25 words total',  max_tokens: 100 },
 }
 
 /**
@@ -44,8 +44,8 @@ Description: ${description || 'A useful mobile application'}
 Rules:
 1. Write ONLY the review comment text — no quotes, no prefixes, no labels
 ${languageInstruction}
-3. LENGTH: ${rule} — this is STRICT, do not exceed or go below
-4. Be specific about features or experience (don't be generic)
+3. LENGTH: ${rule} — this is STRICT, do not exceed or go below. Calculate word count before outputting.
+4. Be specific about features or experience (unless length is short, in which case a generic short positive phrase is fine)
 5. Use natural variations — sometimes start with the app name, sometimes with "I"/"Main", sometimes with an action
 6. Include minor natural imperfections (like "its" instead of "it's" sometimes, or casual abbreviations)
 7. Don't use emojis excessively — max 1 if at all
