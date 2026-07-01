@@ -14,12 +14,15 @@ export default function TelegramJoinModal({ userId }) {
 
     useEffect(() => {
         if (!userId) return
-        let dismissed = false
+        let pending = false
+        let seen = false
         try {
-            dismissed = localStorage.getItem(storageKey) === '1'
+            pending = sessionStorage.getItem('tg_prompt_pending') === '1'
+            seen = localStorage.getItem(storageKey) === '1'
         } catch { /* ignore */ }
-        if (!dismissed) {
-            const t = setTimeout(() => setOpen(true), 900)
+        // Show right after a fresh sign-in, or the first time we ever see this user.
+        if (pending || !seen) {
+            const t = setTimeout(() => setOpen(true), 800)
             return () => clearTimeout(t)
         }
     }, [userId, storageKey])
@@ -27,6 +30,7 @@ export default function TelegramJoinModal({ userId }) {
     const dismiss = () => {
         try {
             localStorage.setItem(storageKey, '1')
+            sessionStorage.removeItem('tg_prompt_pending')
         } catch { /* ignore */ }
         setOpen(false)
     }

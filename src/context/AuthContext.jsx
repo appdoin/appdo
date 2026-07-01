@@ -68,10 +68,18 @@ export function AuthProvider({ children }) {
       if (s?.user?.id) loadProfile(s.user.id)
     }).catch(() => setLoading(false))
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s)
-      if (s?.user?.id) loadProfile(s.user.id)
-      else setProfile(null)
+      if (s?.user?.id) {
+        loadProfile(s.user.id)
+        // Mark a fresh sign-in (e.g. Google OAuth) so we can prompt the
+        // user to join Telegram immediately after they log in.
+        if (event === 'SIGNED_IN') {
+          try { sessionStorage.setItem('tg_prompt_pending', '1') } catch { /* ignore */ }
+        }
+      } else {
+        setProfile(null)
+      }
     })
     return () => sub.subscription.unsubscribe()
   }, [loadProfile])
