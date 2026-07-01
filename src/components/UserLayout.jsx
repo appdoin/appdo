@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { useNotifications } from '../context/NotificationsContext'
 import { useTheme } from '../hooks/useTheme'
 import { rupee } from '../lib/format'
+import TelegramJoinModal from './TelegramJoinModal'
 
 const TITLES = {
   '/': 'Available Apps',
@@ -52,6 +53,9 @@ export default function UserLayout() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col bg-slate-100 dark:bg-[#0a0e1a]">
+      {/* Telegram join popup (shown once after login) */}
+      <TelegramJoinModal userId={profile?.id} />
+
       {/* Starry dark mode background */}
       <div className="stars-bg" />
       <div className="shooting-star" />
@@ -117,8 +121,7 @@ export default function UserLayout() {
               to={to}
               end={to === '/'}
               className={({ isActive }) =>
-                `flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-medium transition ${
-                  isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400'
+                `flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-medium transition ${isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400'
                 }`
               }
             >

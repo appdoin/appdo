@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, NavLink } from 'react-router-dom'
-import { User as UserIcon, Save, LogOut, Award, Shield, Gift, HelpCircle, Users, IndianRupee } from 'lucide-react'
+import { User as UserIcon, Save, LogOut, Award, Shield, Gift, HelpCircle, Users, IndianRupee, Send } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../components/Toast'
 import { rupee } from '../../lib/format'
+import { TELEGRAM_LINK } from '../../components/TelegramJoinModal'
 
 export default function Profile() {
   const { profile, refreshProfile, signOut, isAdmin } = useAuth()
@@ -99,6 +100,28 @@ export default function Profile() {
           </div>
         </div>
       </NavLink>
+
+      {/* Join Telegram */}
+      <a
+        href={TELEGRAM_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="relative block overflow-hidden rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 p-4 text-white shadow-lg shadow-blue-500/30"
+      >
+        <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15 blur-2xl" />
+        <div className="relative flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/20">
+              <Send size={22} className="-ml-0.5" />
+            </div>
+            <div>
+              <p className="text-base font-bold leading-tight">Join our Telegram</p>
+              <p className="text-xs text-white/85">Updates, new tasks &amp; payout alerts</p>
+            </div>
+          </div>
+          <span className="rounded-lg bg-white/20 px-3 py-1.5 text-xs font-semibold">Join</span>
+        </div>
+      </a>
 
       {/* Help & Support */}
       <NavLink to="/help" className="card flex w-full items-center justify-between text-left">
