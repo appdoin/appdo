@@ -159,13 +159,13 @@ export default function HelpSupport() {
 
   const filtered = search.trim()
     ? allQuestions.filter((item) => {
-        const term = search.toLowerCase()
-        return (
-          item.q.toLowerCase().includes(term) ||
-          item.a.toLowerCase().includes(term) ||
-          item.keywords.some((k) => term.includes(k) || k.includes(term))
-        )
-      })
+      const term = search.toLowerCase()
+      return (
+        item.q.toLowerCase().includes(term) ||
+        item.a.toLowerCase().includes(term) ||
+        item.keywords.some((k) => term.includes(k) || k.includes(term))
+      )
+    })
     : null
 
   const toggleFaq = (key) => {
@@ -269,7 +269,7 @@ export default function HelpSupport() {
         <p className="text-xs text-slate-400">Couldn't find your answer? Reach out to us:</p>
 
         <a
-          href="mailto:support@rewardreview.app"
+          href="mailto:support@appdo.in"
           className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 transition active:scale-[0.98] dark:bg-slate-800/50"
         >
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-100 text-brand-600 dark:bg-brand-500/10">
@@ -277,12 +277,12 @@ export default function HelpSupport() {
           </div>
           <div>
             <p className="text-sm font-bold">Email Support</p>
-            <p className="text-xs text-slate-400">support@rewardreview.app</p>
+            <p className="text-xs text-slate-400">support@appdo.in</p>
           </div>
         </a>
 
         <a
-          href="https://t.me/rewardreview_support"
+          href="https://t.me/earnbyappdo"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 transition active:scale-[0.98] dark:bg-slate-800/50"
@@ -292,7 +292,7 @@ export default function HelpSupport() {
           </div>
           <div>
             <p className="text-sm font-bold">Telegram</p>
-            <p className="text-xs text-slate-400">@rewardreview_support</p>
+            <p className="text-xs text-slate-400">@earnbyappdo</p>
           </div>
         </a>
 
