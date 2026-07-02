@@ -7,6 +7,7 @@ import { useNotifications } from '../context/NotificationsContext'
 import { useTheme } from '../hooks/useTheme'
 import { rupee } from '../lib/format'
 import TelegramJoinModal from './TelegramJoinModal'
+import FloatingTelegram from './FloatingTelegram'
 
 const TITLES = {
   '/': 'Available Apps',
@@ -55,6 +56,9 @@ export default function UserLayout() {
     <div className="mx-auto flex min-h-screen max-w-md flex-col bg-slate-100 dark:bg-[#0a0e1a]">
       {/* Telegram join popup (shown once after login) */}
       <TelegramJoinModal userId={profile?.id} />
+
+      {/* Persistent floating Telegram icon until the user joins */}
+      <FloatingTelegram userId={profile?.id} />
 
       {/* Starry dark mode background */}
       <div className="stars-bg" />

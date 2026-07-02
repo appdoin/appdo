@@ -37,6 +37,10 @@ export default function TelegramJoinModal({ userId }) {
 
     const join = () => {
         window.open(TELEGRAM_LINK, '_blank', 'noopener,noreferrer')
+        // Also mark the user as joined so the floating Telegram icon hides.
+        try {
+            if (userId) localStorage.setItem(`tg_joined_${userId}`, '1')
+        } catch { /* ignore */ }
         dismiss()
     }
 
