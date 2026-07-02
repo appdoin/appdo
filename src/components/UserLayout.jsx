@@ -76,8 +76,8 @@ export default function UserLayout() {
       {/* Telegram join popup (shown once after login) */}
       <TelegramJoinModal userId={profile?.id} />
 
-      {/* Persistent floating Telegram icon — always visible, unobtrusive */}
-      <FloatingTelegram userId={profile?.id} />
+      {/* Persistent floating Telegram icon — always visible on Home only */}
+      {pathname === '/' && <FloatingTelegram userId={profile?.id} />}
 
       {/* Starry dark mode background */}
       <div className="stars-bg" />
