@@ -1,31 +1,68 @@
 import { useEffect, useState } from 'react'
-import { Send, X, Check, Users } from 'lucide-react'
+import { Send, X, Check, Users, Loader2 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
+import { buildBotDeepLink, checkTelegramMembership, TELEGRAM_CHANNEL_LINK } from '../lib/telegram'
 
-export const TELEGRAM_LINK = 'https://t.me/earnbyappdo'
+// Kept for backwards compatibility with other pages that import this.
+export const TELEGRAM_LINK = TELEGRAM_CHANNEL_LINK
 
 /**
- * A polished welcome popup that invites the user to join the Telegram channel.
- * Shown once per user after login. The user can either join or skip.
+ * A polished welcome popup that invites the user to join the Telegram
+ * channel. Shown once per user after login, and again later if our backend
+ * detects they left the channel (see FloatingTelegram's periodic recheck).
+ *
+ * Membership is never assumed from a click — "Join Telegram Channel" opens
+ * the bot deep link (which lets our webhook link + verify instantly), and
+ * "I already joined" triggers an explicit server-side recheck via the
+ * telegram-check Edge Function (real Bot API getChatMember call).
  */
 export default function TelegramJoinModal({ userId }) {
+    const { profile, refreshProfile } = useAuth()
     const [open, setOpen] = useState(false)
+    const [checking, setChecking] = useState(false)
+    const [notYet, setNotYet] = useState(false)
 
     const storageKey = userId ? `tg_join_seen_${userId}` : 'tg_join_seen'
 
     useEffect(() => {
         if (!userId) return
+
+        const lastKnownKey = `tg_last_verified_${userId}`
+        let lastKnownVerified = null
+        try {
+            lastKnownVerified = localStorage.getItem(lastKnownKey)
+        } catch { /* ignore */ }
+
+        // Already server-verified — nothing to show, just remember the state.
+        if (profile?.telegram_verified) {
+            try { localStorage.setItem(lastKnownKey, '1') } catch { /* ignore */ }
+            setOpen(false)
+            return
+        }
+
+        // If the user was previously verified and now isn't, our backend
+        // detected they left the channel — clear the "seen" dismissal so
+        // the reminder comes back, and reset the remembered state.
+        if (lastKnownVerified === '1') {
+            try {
+                localStorage.removeItem(storageKey)
+                localStorage.setItem(lastKnownKey, '0')
+            } catch { /* ignore */ }
+        }
+
         let pending = false
         let seen = false
         try {
             pending = sessionStorage.getItem('tg_prompt_pending') === '1'
             seen = localStorage.getItem(storageKey) === '1'
         } catch { /* ignore */ }
-        // Show right after a fresh sign-in, or the first time we ever see this user.
+        // Show right after a fresh sign-in, the first time we ever see this
+        // user, or right after we detected they left the channel.
         if (pending || !seen) {
             const t = setTimeout(() => setOpen(true), 800)
             return () => clearTimeout(t)
         }
-    }, [userId, storageKey])
+    }, [userId, storageKey, profile?.telegram_verified])
 
     const dismiss = () => {
         try {
@@ -33,15 +70,36 @@ export default function TelegramJoinModal({ userId }) {
             sessionStorage.removeItem('tg_prompt_pending')
         } catch { /* ignore */ }
         setOpen(false)
+        setNotYet(false)
     }
 
     const join = () => {
-        window.open(TELEGRAM_LINK, '_blank', 'noopener,noreferrer')
-        // Also mark the user as joined so the floating Telegram icon hides.
-        try {
-            if (userId) localStorage.setItem(`tg_joined_${userId}`, '1')
-        } catch { /* ignore */ }
+        // Deep link to our bot (not the plain channel link) so the webhook
+        // can link this Telegram account to the app user and verify
+        // membership the moment they hit /start.
+        window.open(buildBotDeepLink(userId), '_blank', 'noopener,noreferrer')
         dismiss()
+    }
+
+    const alreadyJoined = async () => {
+        setChecking(true)
+        setNotYet(false)
+        try {
+            const result = await checkTelegramMembership()
+            if (result?.verified) {
+                await refreshProfile()
+                dismiss()
+            } else if (result?.reason === 'NOT_LINKED') {
+                // We don't know their Telegram id yet — send them through the bot first.
+                setNotYet(true)
+            } else {
+                setNotYet(true)
+            }
+        } catch {
+            setNotYet(true)
+        } finally {
+            setChecking(false)
+        }
     }
 
     if (!open) return null
@@ -109,11 +167,26 @@ export default function TelegramJoinModal({ userId }) {
                         </li>
                     </ul>
 
+                    {notYet && (
+                        <div className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                            We couldn't confirm your membership yet. Tap "Join Telegram Channel" below first, then come back and try again.
+                        </div>
+                    )}
+
                     <button
                         onClick={join}
                         className="btn w-full bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3 text-white shadow-md shadow-blue-500/30 hover:from-sky-600 hover:to-blue-700"
                     >
                         <Send size={17} /> Join Telegram Channel
+                    </button>
+
+                    <button
+                        onClick={alreadyJoined}
+                        disabled={checking}
+                        className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                        {checking ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
+                        {checking ? 'Checking…' : 'I already joined'}
                     </button>
 
                     <button

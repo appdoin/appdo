@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Outlet, useLocation, NavLink } from 'react-router-dom'
 import { Home, Trophy, History, Wallet, User, Sun, Moon, Bell, HelpCircle, Gift } from 'lucide-react'
 import { playClick } from '../hooks/useClickSound'
@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { useNotifications } from '../context/NotificationsContext'
 import { useTheme } from '../hooks/useTheme'
 import { rupee } from '../lib/format'
+import { checkTelegramMembership, daysSince, RECHECK_INTERVAL_DAYS } from '../lib/telegram'
 import TelegramJoinModal from './TelegramJoinModal'
 import FloatingTelegram from './FloatingTelegram'
 
@@ -29,11 +30,29 @@ const NAV = [
 ]
 
 export default function UserLayout() {
-  const { profile } = useAuth()
+  const { profile, refreshProfile } = useAuth()
   const { unreadCount } = useNotifications()
   const { dark, toggle } = useTheme()
   const { pathname } = useLocation()
   const title = TITLES[pathname] || (pathname.startsWith('/app/') ? '' : pathname.startsWith('/install-task/') ? '' : 'RewardReview')
+
+  // Silent periodic re-check: if a previously-verified user has since left
+  // the Telegram channel, our backend (Bot API getChatMember) will flip
+  // telegram_verified back to false so the reminder reappears. This is a
+  // safety net in case the real-time leave webhook was ever missed, run at
+  // most once per ~15 days per user.
+  const recheckRanRef = useRef(false)
+  useEffect(() => {
+    if (!profile?.id || !profile?.telegram_verified || recheckRanRef.current) return
+    const staleFor = daysSince(profile.telegram_last_checked_at)
+    if (staleFor < RECHECK_INTERVAL_DAYS) return
+    recheckRanRef.current = true
+    checkTelegramMembership()
+      .then((res) => {
+        if (res && res.verified !== profile.telegram_verified) refreshProfile()
+      })
+      .catch(() => { /* non-blocking */ })
+  }, [profile?.id, profile?.telegram_verified, profile?.telegram_last_checked_at, refreshProfile])
 
   // Global click sound on all buttons & interactive elements
   useEffect(() => {
@@ -57,8 +76,8 @@ export default function UserLayout() {
       {/* Telegram join popup (shown once after login) */}
       <TelegramJoinModal userId={profile?.id} />
 
-      {/* Persistent floating Telegram icon until the user joins */}
-      <FloatingTelegram userId={profile?.id} />
+      {/* Persistent floating Telegram icon until the backend verifies the join */}
+      <FloatingTelegram userId={profile?.id} verified={profile?.telegram_verified} />
 
       {/* Starry dark mode background */}
       <div className="stars-bg" />
