@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Send, X, Check, Users, Loader2 } from 'lucide-react'
+import { Send, Check, Users, Loader2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import {
     buildBotDeepLink,
@@ -98,11 +98,9 @@ export default function TelegramJoinModal({ userId }) {
     }
 
     const join = () => {
-        // Deep link to our bot (not the plain channel link) so the webhook
-        // can link this Telegram account to the app user and verify
-        // membership the moment they hit /start.
+        // Open Telegram. The popup intentionally stays open — it only closes
+        // when the user confirms via "I already joined".
         window.open(buildBotDeepLink(userId), '_blank', 'noopener,noreferrer')
-        dismiss()
     }
 
     const alreadyJoined = async () => {
@@ -142,24 +140,13 @@ export default function TelegramJoinModal({ userId }) {
             aria-modal="true"
             aria-labelledby="tg-modal-title"
         >
-            {/* Backdrop */}
-            <button
-                aria-label="Close"
-                onClick={dismiss}
+            {/* Backdrop — non-dismissable; the popup only closes via "I already joined" */}
+            <div
                 className="absolute inset-0 h-full w-full bg-slate-900/60 backdrop-blur-sm animate-[fade-in_0.25s_ease-out_both]"
             />
 
             {/* Card */}
             <div className="relative w-full max-w-sm animate-[rise_0.4s_ease-out_both] overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900 dark:ring-1 dark:ring-white/10">
-                {/* Close (X) */}
-                <button
-                    onClick={dismiss}
-                    aria-label="Close"
-                    className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-black/5 text-slate-500 transition hover:bg-black/10 dark:bg-white/10 dark:text-slate-300"
-                >
-                    <X size={16} />
-                </button>
-
                 {/* Header with Telegram gradient */}
                 <div className="relative overflow-hidden bg-gradient-to-br from-sky-400 to-blue-600 px-6 pb-8 pt-9 text-center text-white">
                     <div className="pointer-events-none absolute -left-8 -top-10 h-32 w-32 rounded-full bg-white/15 blur-2xl" />
@@ -218,13 +205,6 @@ export default function TelegramJoinModal({ userId }) {
                     >
                         {checking ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
                         {checking ? 'Checking…' : 'I already joined'}
-                    </button>
-
-                    <button
-                        onClick={dismiss}
-                        className="flex w-full items-center justify-center gap-1.5 text-sm font-semibold text-slate-400 transition hover:text-slate-600 dark:hover:text-slate-200"
-                    >
-                        Skip for now
                     </button>
 
                     <p className="flex items-center justify-center gap-1.5 text-center text-[11px] text-slate-400">
