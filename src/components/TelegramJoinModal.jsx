@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Send, X, Check, Users, Loader2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { buildBotDeepLink, checkTelegramMembership, TELEGRAM_CHANNEL_LINK } from '../lib/telegram'
+import {
+    buildBotDeepLink,
+    checkTelegramMembership,
+    TELEGRAM_BOT_CONFIGURED,
+    TELEGRAM_CHANNEL_LINK,
+} from '../lib/telegram'
 
 // Kept for backwards compatibility with other pages that import this.
 export const TELEGRAM_LINK = TELEGRAM_CHANNEL_LINK
@@ -26,6 +31,25 @@ export default function TelegramJoinModal({ userId }) {
 
     useEffect(() => {
         if (!userId) return
+
+        // Honor-based fallback (no verification bot configured yet): hide once
+        // the user has locally marked themselves as joined.
+        if (!TELEGRAM_BOT_CONFIGURED) {
+            let joinedLocal = false
+            try { joinedLocal = localStorage.getItem(`tg_joined_local_${userId}`) === '1' } catch { /* ignore */ }
+            if (joinedLocal) { setOpen(false); return }
+            let seen = false
+            let pending = false
+            try {
+                seen = localStorage.getItem(storageKey) === '1'
+                pending = sessionStorage.getItem('tg_prompt_pending') === '1'
+            } catch { /* ignore */ }
+            if (pending || !seen) {
+                const t = setTimeout(() => setOpen(true), 800)
+                return () => clearTimeout(t)
+            }
+            return
+        }
 
         const lastKnownKey = `tg_last_verified_${userId}`
         let lastKnownVerified = null
@@ -82,6 +106,13 @@ export default function TelegramJoinModal({ userId }) {
     }
 
     const alreadyJoined = async () => {
+        // Honor-based fallback: no bot to verify against, so trust the tap.
+        if (!TELEGRAM_BOT_CONFIGURED) {
+            try { localStorage.setItem(`tg_joined_local_${userId}`, '1') } catch { /* ignore */ }
+            dismiss()
+            return
+        }
+
         setChecking(true)
         setNotYet(false)
         try {

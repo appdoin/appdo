@@ -5,8 +5,17 @@ import { supabase } from './supabase'
 // link the Telegram account and immediately verify real channel membership
 // through the Bot API. We never rely on the plain channel link for
 // verification — a click there proves nothing server-side.
-export const TELEGRAM_BOT_USERNAME = 'earnbyappdo_bot'
+//
+// IMPORTANT: leave this EMPTY until you have actually created a bot with
+// @BotFather. If it's empty, the app falls back to opening the channel link
+// directly (so users never see a "user not found" error). Real, automatic
+// membership verification only works once a real bot username is set here
+// AND the bot is an admin of the channel.
+export const TELEGRAM_BOT_USERNAME = ''
 export const TELEGRAM_CHANNEL_LINK = 'https://t.me/earnbyappdo'
+
+// Whether a real verification bot has been configured.
+export const TELEGRAM_BOT_CONFIGURED = TELEGRAM_BOT_USERNAME.trim().length > 0
 
 // Re-verify membership at most this often automatically, so that if a
 // verified user later leaves the channel we notice within ~15 days even if
@@ -14,6 +23,8 @@ export const TELEGRAM_CHANNEL_LINK = 'https://t.me/earnbyappdo'
 export const RECHECK_INTERVAL_DAYS = 15
 
 export function buildBotDeepLink(userId) {
+    // No bot configured yet → just open the channel so the link always works.
+    if (!TELEGRAM_BOT_CONFIGURED) return TELEGRAM_CHANNEL_LINK
     return `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${userId}`
 }
 
