@@ -110,6 +110,24 @@ export function AuthProvider({ children }) {
     if (error) throw error
   }
 
+  // Verify the 6-digit code emailed to the user right after sign-up.
+  // On success Supabase confirms the email and returns a live session.
+  const verifyEmailOtp = async ({ email, token }) => {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: (email || '').trim(),
+      token: (token || '').trim(),
+      type: 'signup',
+    })
+    if (error) throw error
+    return data
+  }
+
+  // Re-send the sign-up confirmation code.
+  const resendSignupOtp = async (email) => {
+    const { error } = await supabase.auth.resend({ type: 'signup', email: (email || '').trim() })
+    if (error) throw error
+  }
+
   const signInWithGoogle = async () => {
     // Use explicit origin so Google OAuth always returns to the user panel
     // regardless of Supabase Site URL setting
@@ -125,7 +143,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthCtx.Provider
-      value={{ session, profile, loading, signUp, signIn, signInWithGoogle, signOut, refreshProfile, isAdmin: profile?.role === 'admin' }}
+      value={{ session, profile, loading, signUp, signIn, verifyEmailOtp, resendSignupOtp, signInWithGoogle, signOut, refreshProfile, isAdmin: profile?.role === 'admin' }}
     >
       {children}
     </AuthCtx.Provider>

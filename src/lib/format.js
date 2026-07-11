@@ -95,6 +95,15 @@ const ERR = {
   REVIEW_BLOCKED_FRAUD: 'Review blocked. Your account has been flagged for suspicious activity.',
   ACCOUNT_BANNED: 'Your account has been suspended. Contact support.',
   TOO_MANY_OTP_REQUESTS: 'Too many OTP requests. Wait 1 hour and try again.',
+  // Auth / email verification
+  'Database error saving new user': 'Could not create your account right now. Please try again in a moment.',
+  'User already registered': 'An account with this email already exists. Please sign in instead.',
+  'Email not confirmed': 'Please verify your email with the code we sent before signing in.',
+  'Token has expired or is invalid': 'That code is expired or incorrect. Request a new one.',
+  'Invalid login credentials': 'Incorrect email or password.',
+  'For security purposes': 'Please wait a moment before requesting another code.',
+  'Email rate limit exceeded': 'Too many emails sent. Please wait a few minutes and try again.',
+  'over_email_send_rate_limit': 'Too many emails sent. Please wait a few minutes and try again.',
 }
 
 export function niceError(error) {
