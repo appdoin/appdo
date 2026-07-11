@@ -77,6 +77,31 @@ export async function generateFingerprint() {
   return hash
 }
 
+// Cross-browser-stable HARDWARE id.
+//
+// Unlike generateFingerprint() (which mixes in browser-engine-specific
+// signals like userAgent, canvas, webgl, audio & language that differ
+// between Chrome/Firefox/etc. on the SAME phone), this uses only signals
+// that stay the same across different browsers on the same physical device.
+// It is intentionally lower-entropy so it can catch "same device, different
+// browser" attempts to verify a second phone number.
+//
+// Trade-off: two different people with the exact same device model + screen
+// + timezone can collide. That's why the server treats a hardware-id clash
+// as blockable but admins can whitelist a user to override false positives.
+export async function generateHardwareId() {
+  const c = []
+  c.push(`${screen.width}x${screen.height}`)
+  c.push(`${screen.colorDepth}`)
+  c.push(`${window.devicePixelRatio || 1}`)
+  c.push(Intl.DateTimeFormat().resolvedOptions().timeZone || '')
+  c.push(`${navigator.hardwareConcurrency || 0}`)
+  c.push(`${navigator.maxTouchPoints || 0}`)
+  // Platform without browser name/version noise.
+  c.push((navigator.userAgentData?.platform || navigator.platform || '').toLowerCase())
+  return 'hw_' + (await hashString(c.join('|')))
+}
+
 // Get metadata for registration
 export function getDeviceMetadata() {
   return {

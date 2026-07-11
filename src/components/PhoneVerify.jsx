@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from './Toast'
 import { niceError, getDeviceId } from '../lib/format'
-import { generateFingerprint } from '../lib/fingerprint'
+import { generateFingerprint, generateHardwareId } from '../lib/fingerprint'
 
 // In-App OTP Verification Flow:
 // 1. User enters phone number
@@ -45,19 +45,24 @@ export default function PhoneVerify() {
     setBusy(true)
     setStep('checking')
     try {
-      // Combine a stable device id with a browser fingerprint for fraud checks
+      // Combine a stable device id with a browser fingerprint and a
+      // cross-browser hardware id for stronger anti-fraud.
       const fingerprint = await generateFingerprint()
+      const hardwareId = await generateHardwareId()
 
       const { data, error: rpcErr } = await supabase.rpc('request_phone_otp_v2', {
         p_phone: cleanPhone,
         p_device_id: getDeviceId(),
         p_fingerprint: fingerprint,
+        p_hardware_id: hardwareId,
       })
 
       if (rpcErr) {
         const msg = rpcErr.message || ''
         if (msg.includes('PHONE_ALREADY_USED')) {
           setError('This number is already verified on another account.')
+        } else if (msg.includes('DEVICE_ALREADY_HAS_PHONE')) {
+          setError('This device already has a verified phone number. Only one phone number can be verified per device.')
         } else if (msg.includes('TOO_MANY_OTP_REQUESTS')) {
           setError('Too many requests. Please wait 1 hour.')
         } else if (msg.includes('FRAUD_DETECTED')) {

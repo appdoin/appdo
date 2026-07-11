@@ -79,6 +79,7 @@ function getCookie(name) {
 // Friendly messages for backend error codes
 const ERR = {
   DEVICE_ALREADY_REGISTERED: 'An account already exists on this device.',
+  DEVICE_ALREADY_HAS_PHONE: 'This device already has a verified phone number. Only one phone number can be verified per device.',
   PHONE_ALREADY_USED: 'This phone number is already linked to another account.',
   ALREADY_REVIEWED: 'You have already reviewed this app.',
   NO_SLOTS_LEFT: 'No slots left for this app.',
