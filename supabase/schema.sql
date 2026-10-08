@@ -182,24 +182,6 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 -- =============================================================
---  AUTO-PROMOTE test@gmail.com to admin
--- =============================================================
-create or replace function public.auto_promote_test_admin()
-returns trigger language plpgsql security definer set search_path = public as $$
-begin
-  if new.email = 'test@gmail.com' then
-    new.role := 'admin';
-  end if;
-  return new;
-end;
-$$;
-
-drop trigger if exists promote_test_admin on public.profiles;
-create trigger promote_test_admin
-  before insert on public.profiles
-  for each row execute function public.auto_promote_test_admin();
-
--- =============================================================
 --  REVIEW SUBMISSION
 -- =============================================================
 create or replace function public.submit_review(
