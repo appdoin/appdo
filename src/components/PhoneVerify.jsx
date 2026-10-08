@@ -95,10 +95,11 @@ export default function PhoneVerify() {
     setBusy(true)
     setError('')
     try {
-      const { error: verErr } = await supabase.rpc('verify_phone_otp', { p_code: code })
+      const { data, error: verErr } = await supabase.rpc('verify_phone_otp_v2', { p_code: code })
       if (verErr) throw verErr
+      if (!data?.verified) throw new Error(data?.error || 'Verification failed. Please try again.')
       toast.success('Phone verified! 🎉')
-      refreshProfile()
+      await refreshProfile()
     } catch (err) {
       setError(niceError(err))
     } finally {

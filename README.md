@@ -34,6 +34,7 @@ economy. Backend powered by **Supabase**.
 ## 🚀 Setup
 
 ### 1. Install dependencies
+Use Node.js 22.12 or newer (select Node.js 22 or 24 on Vercel).
 ```bash
 npm install
 ```
@@ -53,6 +54,11 @@ Setup refuses a project with existing public tables, auth users, buckets, or
 storage policies. It installs the ordered migrations, RLS, production grants,
 default settings, and the `proofs` bucket. It does not create sample apps or admins.
 
+APPDO also has the OTP attempt-limit fix installed. Phone verification uses
+`verify_phone_otp_v2`, which returns `{ verified, error, attempts_remaining }`.
+Invalid attempts persist and five failures lock that code. The old
+`verify_phone_otp` RPC is no longer accessible to browser clients.
+
 ### 3. Environment variables
 ```bash
 cp .env.example .env
@@ -68,6 +74,11 @@ VITE_SUPABASE_ANON_KEY=eyJ...
 npm run dev
 ```
 Open http://localhost:5173
+
+Run the focused auth, wallet, and OTP UI regression tests:
+```bash
+npm test
+```
 
 ### 5. Make yourself admin
 Sign up normally, then promote your own verified account in the Supabase SQL Editor:

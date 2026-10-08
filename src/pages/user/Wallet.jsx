@@ -42,18 +42,27 @@ export default function Wallet() {
   }, [])
 
   const saveUpi = async () => {
-    await supabase.from('profiles').update({ upi_id: upi }).eq('id', profile.id)
-    setEditUpi(false)
-    refreshProfile()
-    toast.success('UPI ID updated.')
+    setSavingMethod(true)
+    try {
+      const { error } = await supabase.from('profiles').update({ upi_id: upi.trim() }).eq('id', profile.id)
+      if (error) throw error
+      await refreshProfile()
+      setEditUpi(false)
+      toast.success('UPI ID updated.')
+    } catch (err) {
+      toast.error(niceError(err))
+    } finally {
+      setSavingMethod(false)
+    }
   }
 
   const chooseMethod = async (m) => {
-    setMethod(m)
     setSavingMethod(true)
     try {
-      await supabase.from('profiles').update({ payout_method: m }).eq('id', profile.id)
-      refreshProfile()
+      const { error } = await supabase.from('profiles').update({ payout_method: m }).eq('id', profile.id)
+      if (error) throw error
+      setMethod(m)
+      await refreshProfile()
     } catch (e) { toast.error(niceError(e)) } finally { setSavingMethod(false) }
   }
 
@@ -130,7 +139,7 @@ export default function Wallet() {
               {!editUpi ? (
                 <button onClick={() => setEditUpi(true)} className="flex items-center gap-1 text-sm font-semibold text-brand-600"><Pencil size={14} /> Edit</button>
               ) : (
-                <button onClick={saveUpi} className="flex items-center gap-1 text-sm font-semibold text-emerald-600"><Check size={14} /> Save</button>
+                <button onClick={saveUpi} disabled={savingMethod} className="flex items-center gap-1 text-sm font-semibold text-emerald-600"><Check size={14} /> Save</button>
               )}
             </div>
             {editUpi ? (
@@ -187,7 +196,7 @@ export default function Wallet() {
         <h3 className="mb-3 flex items-center gap-2 font-bold"><ArrowDownToLine size={16} /> Request Withdrawal</h3>
         <div className="flex gap-2">
           <input type="number" className="input" placeholder={`Amount (min ${min})`} value={amount} onChange={(e) => setAmount(e.target.value)} />
-          <button onClick={withdraw} disabled={busy || !amount} className="btn-primary px-6">{busy ? '…' : 'Withdraw'}</button>
+          <button onClick={withdraw} disabled={busy || savingMethod || !amount} className="btn-primary px-6">{busy ? '…' : 'Withdraw'}</button>
         </div>
         {!profile?.phone_verified && <p className="mt-2 text-xs text-rose-500">Verify your WhatsApp number to withdraw.</p>}
       </div>

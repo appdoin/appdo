@@ -23,6 +23,7 @@ const files = [
   'signup_email_otp_fix.sql',
   'telegram_verification_migration.sql',
   'production_setup.sql',
+  'otp_attempts_fix.sql',
 ]
 const guard = `
 do $$ begin

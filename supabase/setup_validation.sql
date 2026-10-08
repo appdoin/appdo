@@ -52,6 +52,53 @@ do $$ begin
 end $$;
 reset role;
 
+insert into public.phone_verifications (user_id, phone, code, expires_at)
+values ('00000000-0000-0000-0000-000000000001', '9876543210', '123456', now() + interval '10 minutes');
+set local role authenticated;
+do $$ declare result jsonb;
+begin
+  result := public.verify_phone_otp_v2('000000');
+  if result->>'error' <> 'INVALID_CODE' or (result->>'verified')::boolean then
+    raise exception 'Incorrect OTP was accepted';
+  end if;
+end $$;
+reset role;
+do $$ begin
+  if (select attempts from public.phone_verifications
+    where user_id = '00000000-0000-0000-0000-000000000001' and not verified) <> 1 then
+    raise exception 'Incorrect OTP attempt was rolled back';
+  end if;
+end $$;
+
+set local role authenticated;
+do $$ declare attempt_number int; result jsonb;
+begin
+  for attempt_number in 2..5 loop
+    result := public.verify_phone_otp_v2('000000');
+    if result->>'error' <> 'INVALID_CODE' then raise exception 'Invalid OTP response'; end if;
+  end loop;
+  result := public.verify_phone_otp_v2('123456');
+  if result->>'error' <> 'TOO_MANY_ATTEMPTS' or (result->>'verified')::boolean then
+    raise exception 'OTP attempt limit was bypassed';
+  end if;
+  begin
+    perform public.verify_phone_otp('123456');
+    raise exception 'Legacy OTP endpoint remains accessible';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+reset role;
+
+update public.phone_verifications set attempts = 0
+where user_id = '00000000-0000-0000-0000-000000000001' and not verified;
+set local role authenticated;
+do $$ declare result jsonb;
+begin
+  result := public.verify_phone_otp_v2('123456');
+  if result->>'verified' <> 'true' then raise exception 'Valid OTP was rejected'; end if;
+end $$;
+reset role;
+
 set local role anon;
 do $$ begin
   perform count(*) from public.apps;
