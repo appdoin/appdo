@@ -99,6 +99,21 @@ to manage apps and approvals.
    Redirect URLs, plus `http://localhost:5173` and `http://localhost:5173/update-password`
    for local development.
 
+The current local Auth URL configuration is in `supabase/config.toml` and is
+applied to APPDO: Site URL is `http://localhost:5173`, with exact localhost and
+127.0.0.1 login/password-reset redirects. Supabase falls back to Site URL when
+the requested redirect is not allowlisted; an empty list previously sent Google
+login to the default `http://localhost:3000`.
+
+Before deploying, update this config's Site URL to the production origin and add
+its login/password-reset redirects while retaining the local entries. Preview
+with `supabase config diff` before using `supabase config push`; do not push the
+local Site URL over an already configured production domain.
+
+OAuth callback URLs contain session tokens. Do not share them. After a token
+URL is exposed, revoke the affected sessions and sign in again; a new login
+alone does not revoke the old session.
+
 ### 7. Deploy to Vercel (from GitHub)
 1. Push this code to a GitHub repo
 2. Import the repo in [Vercel](https://vercel.com/new)
