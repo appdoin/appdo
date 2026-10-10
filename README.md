@@ -100,16 +100,19 @@ to manage apps and approvals.
    for local development.
 
 The current Auth URL configuration is in `supabase/config.toml` and is applied
-to APPDO: Site URL is `https://appdo.vercel.app`. Production login/password-reset
-redirects are allowed alongside the existing localhost, 127.0.0.1, and Vercel
-preview entries. Supabase falls back to Site URL when a requested redirect is
-not allowlisted.
+to APPDO: Site URL is `https://appdo.in`. Both `appdo.in` and `www.appdo.in`
+login/password-reset redirects are allowed alongside the existing localhost,
+127.0.0.1, and Vercel entries. Supabase falls back to Site URL when a requested
+redirect is not allowlisted. The Google Console callback remains the Supabase
+`/auth/v1/callback` URL above, not the website domain.
 
-`VITE_APP_URL=https://appdo.vercel.app` makes Google login return to the hosted
-site even when started from localhost. Remove this override only when deliberately
-testing Google login on the local origin. Password-reset redirects continue to use
-the browser's current origin. Preview `supabase config diff` before using
-`supabase config push`, preserving production and preview URLs.
+Set `VITE_APP_URL=https://appdo.in` in Vercel and redeploy to make Google login
+return to the custom domain. Supabase's Site URL does not override an explicit,
+allowlisted `VITE_APP_URL`; an older Vercel-domain value will still return there.
+Remove this override only when deliberately testing Google login on the local
+origin. Password-reset redirects continue to use the browser's current origin.
+Preview `supabase config diff` before using `supabase config push`, preserving
+production and preview URLs.
 
 OAuth callback URLs contain session tokens. Do not share them. After a token
 URL is exposed, revoke the affected sessions and sign in again; a new login
@@ -122,7 +125,7 @@ alone does not revoke the old session.
    - `VITE_SUPABASE_URL` = `https://kkquvadzewwgqbmgdzbj.supabase.co`
    - `VITE_SUPABASE_ANON_KEY` = the public anon key from the ignored local `.env`
    - `VITE_APP_NAME` = `RewardReview` (optional)
-   - `VITE_APP_URL` = `https://appdo.vercel.app` (Google login return URL)
+   - `VITE_APP_URL` = `https://appdo.in` (Google login return URL; redeploy after changing)
 4. Import `appdoin/appdo`, branch `main`, root directory `./`.
 5. Framework preset: **Vite**, build command `npm run build`, output directory `dist`.
 6. Add the variables to Production and Preview, then deploy. Redeploy after any

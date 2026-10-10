@@ -1,8 +1,14 @@
 project_id = "kkquvadzewwgqbmgdzbj"
 
 [auth]
-site_url = "https://appdo.vercel.app"
+site_url = "https://appdo.in"
 additional_redirect_urls = [
+	"https://appdo.in",
+	"https://appdo.in/",
+	"https://appdo.in/update-password",
+	"https://www.appdo.in",
+	"https://www.appdo.in/",
+	"https://www.appdo.in/update-password",
 	"https://appdo.vercel.app",
 	"https://appdo.vercel.app/",
 	"https://appdo.vercel.app/update-password",
